@@ -33,7 +33,9 @@ public class main {
 	    			frequence.put(c, 1);
 	    		}
 	      }
+	      //hashmap des frequences
 	      System.out.print(frequence);
+	      //List de lordre des cle de la hashmap
 	      System.out.print(getWordInDescendingFreqOrder(frequence));
 	}
 	static List<Byte> getWordInDescendingFreqOrder(Map<Byte, Integer> wordCount) {
