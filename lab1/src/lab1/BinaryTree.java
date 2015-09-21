@@ -165,6 +165,7 @@ public class BinaryTree {
 	}
 
 public static void main(String[] args) {
+		//http://www.newthinktank.com/2013/03/binary-tree-in-java/
 		//TODO prendre le hashmap(frequence) et la liste de l'ordre des clé
 		BinaryTree theTree = new BinaryTree();
 
