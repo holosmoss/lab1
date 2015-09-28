@@ -17,6 +17,7 @@ import java.util.Map;
 public class main {
 	//branche aimeric
 	public static void main(String[] args) throws IOException{
+		
 		  BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		  //System.out.print("Enter String : ");
 	      //ouvrir le fichier positioner dans le dossier du projet avec le nom indiquer dans la console
@@ -33,14 +34,30 @@ public class main {
 	    			frequence.put(c, 1);
 	    		}
 	      }
-	      System.out.print(frequence);
-	      System.out.print(getWordInDescendingFreqOrder(frequence));
+	      //hashmap des frequences
+	      System.out.println("Les occurences: " + frequence);
+	      //List de lordre des cle de la hashmap
+	      List<Byte> freqSortedList = getWordInDescendingFreqOrder(frequence);
+	      System.out.println("La liste trié: "+freqSortedList);
+	      
+	      //construit l'arbre binaire
+	      ArbreBinaire arbreBin = new ArbreBinaire(frequence, freqSortedList);
+	      System.out.println( "la liste de noeud: "+ arbreBin.printNodeList( arbreBin.getNodeList() ) );
+	      
+	      
 	}
-	static List<Byte> getWordInDescendingFreqOrder(Map<Byte, Integer> wordCount) {
+	
+	/**
+	 * 
+	 * @param wordCount une Map<Byte, Integer> contenant des byte et son nombres d'occurence
+	 * @return List<Byte> une liste de Byte trié en ordre décroissant du nombre d'occurence
+	 */
+	public static List<Byte> getWordInDescendingFreqOrder(Map<Byte, Integer> wordCount) {
+		
 		//http://stackoverflow.com/questions/10158793/sorting-words-in-order-of-frequency-least-to-greatest
 	    // Convert map to list of <String,Integer> entries
 	    List<Map.Entry<Byte, Integer>> list = 
-	        new ArrayList<Map.Entry<Byte, Integer>>(wordCount.entrySet());
+	        new ArrayList< Map.Entry<Byte, Integer> >( wordCount.entrySet() );
 
 	    // Sort list by integer values
 	    Collections.sort(list, new Comparator<Map.Entry<Byte, Integer>>() {
@@ -51,10 +68,13 @@ public class main {
 	    });
 
 	    // Populate the result into a list
-	    List<Byte> result = new ArrayList<Byte>();
+	    List<Byte> result = new ArrayList<Byte>(); //on devrait populer le résultat dans un autre map pour garder le integer
 	    for (Map.Entry<Byte, Integer> entry : list) {
-	        result.add(entry.getKey());
+	        result.add(entry.getKey());   	
+	    	
 	    }
+	    	    
 	    return result;
+	    
 	}
 }
