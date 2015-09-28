@@ -22,7 +22,13 @@ public class Node {
 		this.freqLettre = frequence;
 		
 	}
-
+	public Node(byte byteValue, Integer frequence,Node enfant1,Node enfant2) {
+		this.lettre = byteValue;
+		this.freqLettre = frequence;
+		this.nodeDroit = enfant1;
+		this.nodeGauche = enfant2;
+		
+	}
 	public boolean isLeaf() {
 		return isLeaf;
 	}

@@ -50,6 +50,33 @@ public class ArbreBinaire {
 		return nodeList;
 	}
 	
+public void ArbreBinaire11(Map<Byte, Integer> frequence, List<Byte> freqSortedList) {
+		
+		nodeList = new ArrayList<Node>();
+		
+		//créer les noeuds de chaque caractère(byte) avec leur fréquence
+		for(Byte b : freqSortedList){
+			
+			Node n = new Node(b.byteValue(),frequence.get(b.byteValue() ));
+			nodeList.add(n);
+		}
+		Byte kk = null;
+		int dernier = nodeList.get(nodeList.size() ).getFreqLettre();
+		int avDernier = nodeList.get(nodeList.size()-1 ).getFreqLettre();
+		Node nouv = new Node(kk,dernier+avDernier);
+		nouv.setParent(null);
+		if(dernier>avDernier){
+			nouv.setNodeDroit(nodeList.get(nodeList.size()-1));
+			nouv.setNodeGauche(nodeList.get(nodeList.size()));
+		}else{
+			nouv.setNodeDroit(nodeList.get(nodeList.size()));
+			nouv.setNodeGauche(nodeList.get(nodeList.size()-1));
+		}
+		
+		
+		//reste à créer les noeuds des feuilles et tout linké ensemble... + codage decodage...
+	}
+
 	
 	
 
