@@ -105,24 +105,37 @@ public class ArbreBinaire {
 			
 		}
 
+	/**
+	 * Remplace les caractères du fichier texte dans un String par 
+	 * leur valeur binaire respective dans l'arbre puis 
+	 * retourne la String encodé...
+	 * 
+	 */
 	private String compress(Node node, String text){
 		Node kidDroit = node.getNodeDroit();
 		Node kidGauche = node.getNodeGauche();
 		String tmpText = text;
-		
+//		si  l'enfant droit est une feuille
 		if(kidDroit != null && kidDroit.isLeaf)
+//			remplace tout les caractères comme la lettre de la feuille par sa valeur binaire
+//			garde le texte modifié dans le tempText
 			tmpText = tmpText.replaceAll(String.valueOf(byteToChar(kidDroit.lettre) ),
 							kidDroit.binaryValue);
-		
-
+//		si  l'enfant gauche est une feuille
 		if(kidGauche != null && kidGauche.isLeaf)
+//			utilise le tempText  et continue de remplacer tout les caractères comme la lettre de la feuille par sa valeur binaire
+//			garde le texte modifié dans le tempText
 			tmpText = tmpText.replaceAll(String.valueOf(byteToChar(kidGauche.lettre) ),
 					kidGauche.binaryValue);
 		
+//		si l'enfant droit est un noeud 		
 		if(kidDroit != null && !kidDroit.isLeaf)
+//			on lui dit de compresser récursivement de son bord en sauvant encore dans temp
 			tmpText = compress(kidDroit,tmpText);
-		
+
+//		si l'enfant gauche est un noeud 
 		if(kidGauche != null && !kidGauche.isLeaf)
+//			on lui dit de compresser récursivement de son bord en sauvant encore dans temp
 			tmpText = compress(kidGauche,tmpText);
 		
 		
