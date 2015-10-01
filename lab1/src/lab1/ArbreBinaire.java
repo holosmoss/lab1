@@ -1,5 +1,7 @@
 package lab1;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.util.*;
 
 public class ArbreBinaire {
@@ -24,6 +26,8 @@ public class ArbreBinaire {
 		}
 		
 		root = creerArbre(nodeList);
+		binaryNames(root);
+		
 		System.out.println(root.toString() );
 		System.out.println(root.getNodeDroit().toString() );
 		System.out.println(root.getNodeGauche().toString() );
@@ -66,7 +70,39 @@ public class ArbreBinaire {
 		
 	}
 	
-	
+	/**
+	 * Fonction récursive qui nomme la chaine de caractère 
+	 * binaryValue de chaque noeud de l'arbre binaire.
+	 * la chaine correspond au chemin pour retrouver le caractère
+	 * dans l'arbre exemple a = 010
+	 * @param node - la node initial doit être la racine de l'arbre 
+	 * 
+	 */
+	private void binaryNames(Node node){
+			
+			//assigne la racine de l'arbre à 0
+			if( node.binaryValue.equals("") ){
+				node.binaryValue = "0";				
+			}
+			String parentBVal = node.binaryValue;
+			Node kidDroit = node.getNodeDroit();
+			Node kidGauche = node.getNodeGauche();
+			
+			if(kidDroit != null){
+				kidDroit.binaryValue = parentBVal+"1";				
+				
+				if(!kidDroit.isLeaf){
+					binaryNames(kidDroit);
+				}
+			}
+			if(kidGauche != null){
+				kidGauche.binaryValue = parentBVal+"0";
+				if(!kidGauche.isLeaf){
+					binaryNames(kidGauche);
+				}
+			}
+			
+		}
 
 
 
@@ -96,6 +132,89 @@ public class ArbreBinaire {
 	}
 	
 	
-	
+	/**
+	 * Classe interne pour créer des noeuds dans l'arbre binaire
+	 * @author Joel
+	 *
+	 */
+	private class Node {
+		
+		private String binaryValue = ""; // ex 111 pour la lettre totalement à droite
+		private boolean isLeaf; // s'il s'agit d'un noeud dit "feuille" de l'arbre binaire
+		private Node nodeDroit = null ; // lien vers prochain noeuf a sa droite
+		private Node nodeGauche = null; // lien vers prochain noeuf a sa gauche
+		private byte lettre; // la lettre en byte que contient le noeud
+		private int freqLettre; // frequence de cette lettre
+		private Node parent; // valeur du noeud parent à ce noeud
+		
+		//constructeur
+		public Node(byte byteValue, int frequence) {
+			this.lettre = byteValue;
+			this.freqLettre = frequence;
+			
+		}
+		public Node(int frequence) {
+			this.isLeaf = false;
+			this.freqLettre = frequence;
+			
+		}
+
+		public boolean isLeaf() {
+			return isLeaf;
+		}
+		public void setLeaf(boolean isLeaf) {
+			this.isLeaf = isLeaf;
+		}
+		public Node getNodeDroit() {
+			return nodeDroit;
+		}
+		public void setNodeDroit(Node nodeDroit) {
+			this.nodeDroit = nodeDroit;
+		}
+		public Node getNodeGauche() {
+			return nodeGauche;
+		}
+		public void setNodeGauche(Node nodeGauche) {
+			this.nodeGauche = nodeGauche;
+		}
+		public Byte getLettre() {
+			return lettre;
+		}
+		public void setLettre(Byte lettre) {
+			this.lettre = lettre;
+		}
+		public int getFreqLettre() {
+			return freqLettre;
+		}
+		public void setFreqLettre(int freqLettre) {
+			this.freqLettre = freqLettre;
+		}
+		public Node getParent() {
+			return parent;
+		}
+		public void setParent(Node parent) {
+			this.parent = parent;
+		}
+		
+		public String toString(){
+			
+			return ("lettre: "+byteToChar(this.lettre) +
+					" freq: " +this.freqLettre +
+					" "+ this.binaryValue);
+		}
+		
+		/**
+		 * 
+		 * @param b
+		 * @return
+		 */
+		private char byteToChar(byte b){ 
+			byte ba[] = {b};
+			StringBuilder buffer = new StringBuilder();
+		    buffer.append((char)ba[0]); 
+	        return buffer.charAt(0);
+		}
+
+	}
 
 }
