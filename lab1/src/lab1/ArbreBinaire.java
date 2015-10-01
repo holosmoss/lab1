@@ -28,11 +28,11 @@ public class ArbreBinaire {
 		root = creerArbre(nodeList);
 		binaryNames(root);
 		
-		System.out.println(root.toString() );
-		System.out.println(root.getNodeDroit().toString() );
-		System.out.println(root.getNodeGauche().toString() );
-		System.out.println(root.getNodeDroit().getNodeDroit().toString() );
-		System.out.println(root.getNodeDroit().getNodeGauche().toString() );
+//		System.out.println(root.toString() );
+//		System.out.println(root.getNodeDroit().toString() );
+//		System.out.println(root.getNodeGauche().toString() );
+//		System.out.println(root.getNodeDroit().getNodeDroit().toString() );
+//		System.out.println(root.getNodeDroit().getNodeGauche().toString() );
 	}
 
 	
@@ -80,11 +80,12 @@ public class ArbreBinaire {
 	 */
 	private void binaryNames(Node node){
 			
+			String parentBVal = node.binaryValue;
 			//assigne la racine de l'arbre à 0
 			if( node.binaryValue.equals("") ){
-				node.binaryValue = "0";				
+				node.binaryValue = "root";
+				
 			}
-			String parentBVal = node.binaryValue;
 			Node kidDroit = node.getNodeDroit();
 			Node kidGauche = node.getNodeGauche();
 			
@@ -104,7 +105,34 @@ public class ArbreBinaire {
 			
 		}
 
+	private String compress(Node node, String text){
+		Node kidDroit = node.getNodeDroit();
+		Node kidGauche = node.getNodeGauche();
+		String tmpText = text;
+		
+		if(kidDroit != null && kidDroit.isLeaf)
+			tmpText = tmpText.replaceAll(String.valueOf(byteToChar(kidDroit.lettre) ),
+							kidDroit.binaryValue);
+		
 
+		if(kidGauche != null && kidGauche.isLeaf)
+			tmpText = tmpText.replaceAll(String.valueOf(byteToChar(kidGauche.lettre) ),
+					kidGauche.binaryValue);
+		
+		if(kidDroit != null && !kidDroit.isLeaf)
+			tmpText = compress(kidDroit,tmpText);
+		
+		if(kidGauche != null && !kidGauche.isLeaf)
+			tmpText = compress(kidGauche,tmpText);
+		
+		
+
+		return tmpText;
+	}
+	
+	public String doCompress(String text){
+		return compress(this.root, text);
+	}
 
 	/**
 	 * petit fonction pour faire afficher la list de noeud...
@@ -131,6 +159,18 @@ public class ArbreBinaire {
 		return nodeList;
 	}
 	
+	/**
+	 * 
+	 * @param b
+	 * @return
+	 */
+	public char byteToChar(byte b){ 
+		byte ba[] = {b};
+		StringBuilder buffer = new StringBuilder();
+	    buffer.append((char)ba[0]); 
+        return buffer.charAt(0);
+	}
+	
 	
 	/**
 	 * Classe interne pour créer des noeuds dans l'arbre binaire
@@ -151,6 +191,7 @@ public class ArbreBinaire {
 		public Node(byte byteValue, int frequence) {
 			this.lettre = byteValue;
 			this.freqLettre = frequence;
+			this.isLeaf = true;
 			
 		}
 		public Node(int frequence) {
@@ -203,17 +244,7 @@ public class ArbreBinaire {
 					" "+ this.binaryValue);
 		}
 		
-		/**
-		 * 
-		 * @param b
-		 * @return
-		 */
-		private char byteToChar(byte b){ 
-			byte ba[] = {b};
-			StringBuilder buffer = new StringBuilder();
-		    buffer.append((char)ba[0]); 
-	        return buffer.charAt(0);
-		}
+		
 
 	}
 

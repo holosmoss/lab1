@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class main {
 	      File file = new File("test.txt");
 	      Path path = file.toPath();
 	      byte [] b = Files.readAllBytes(path);
+	      String wholeString = new String(b, Charset.defaultCharset() );
 	      Map <Byte,Integer> frequence = new HashMap <Byte,Integer>();
 	      for(byte c : b){
 	    	  	if (frequence.containsKey(c)) {
@@ -35,15 +37,17 @@ public class main {
 	    		}
 	      }
 	      //hashmap des frequences
-	     // System.out.println("Les occurences: " + frequence);
+	      //System.out.println("Les occurences: " + frequence);
 	      //List de lordre des cle de la hashmap
 	      List<Byte> freqSortedList = getWordInDescendingFreqOrder(frequence);
 	      //System.out.println("La liste trié: "+freqSortedList);
 	      
 	      //construit l'arbre binaire
 	      ArbreBinaire arbreBin = new ArbreBinaire(frequence, freqSortedList);
-	     // System.out.println( "la liste de noeud: "+ arbreBin.printNodeList( arbreBin.getNodeList() ) );
+	      //System.out.println( "la liste de noeud: "+ arbreBin.printNodeList( arbreBin.getNodeList() ) );
+	      String compressSuperTight = arbreBin.doCompress(wholeString);
 	      
+	      System.out.println(compressSuperTight);
 	      
 	}
 	
