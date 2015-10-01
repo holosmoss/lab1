@@ -8,7 +8,7 @@ package lab1;
  */
 public class Node {
 	
-	private int binaryValue; // 1 = noeud à droite du parent, 0 = à gauche...
+	private String binaryValue; // ex 111 pour la lettre totalement à droite
 	private boolean isLeaf; // s'il s'agit d'un noeud dit "feuille" de l'arbre binaire
 	private Node nodeDroit; // lien vers prochain noeuf a sa droite
 	private Node nodeGauche; // lien vers prochain noeuf a sa gauche
@@ -17,8 +17,13 @@ public class Node {
 	private Node parent; // valeur du noeud parent à ce noeud
 	
 	//constructeur
-	public Node(byte byteValue, Integer frequence) {
+	public Node(byte byteValue, int frequence) {
 		this.lettre = byteValue;
+		this.freqLettre = frequence;
+		
+	}
+	public Node(int frequence) {
+		this.lettre = null;
 		this.freqLettre = frequence;
 		
 	}
@@ -62,7 +67,7 @@ public class Node {
 	
 	public String toString(){
 		
-		return ("lettre: "+this.lettre.toString() +"freq: " +this.freqLettre);
+		return ("lettre: "+this.lettre +" freq: " +this.freqLettre);
 	}
 
 }
