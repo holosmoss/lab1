@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,8 +48,18 @@ public class main {
 	      //System.out.println( "la liste de noeud: "+ arbreBin.printNodeList( arbreBin.getNodeList() ) );
 	      String compressSuperTight = arbreBin.doCompress(wholeString);
 	      
-	      System.out.println(compressSuperTight);
 	      
+	      //TEST pour écrire notre file en binaire (string style)
+	      System.out.println(compressSuperTight);
+	      PrintWriter writer = new PrintWriter("compressed.txt", "UTF-8");
+	      writer.println(compressSuperTight);
+	      writer.close();
+	      
+//	      TODO test this method whit byte[] instead of string
+//	      byte dataToWrite[] = //...
+//		  FileOutputStream out = new FileOutputStream("the-file-name");
+//		  out.write(dataToWrite);
+//		  out.close();
 	}
 	
 	/**
