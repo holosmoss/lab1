@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -27,24 +28,34 @@ public class main {
 	      File file = new File("test.txt");
 	      Path path = file.toPath();
 	      byte [] b = Files.readAllBytes(path);
-	      String wholeString = new String(b, Charset.defaultCharset() );
+	      String wholeString = new String(b, StandardCharsets.UTF_8 );
 	      //display48(wholeString);
-	      Map <Byte,Integer> frequence = new HashMap <Byte,Integer>();
-	      for(byte c : b){
-	    	  	if (frequence.containsKey(c)) {
+//	      Map <Byte,Integer> frequence = new HashMap <Byte,Integer>();
+//	      for(byte c : b){
+//	    	  	if (frequence.containsKey(c)) {
+//	    		    Integer prev = frequence.get(c);
+//	    		    frequence.put(c, prev+1);
+//	    		}  else {
+//	    			frequence.put(c, 1);
+//	    		}
+//	      }
+	      //hashmap des frequences
+	      Map <Character,Integer> frequence = new HashMap <Character,Integer>();
+	      for(int i = 0;i < wholeString.length();i++){
+	    	  char c = wholeString.charAt(i);
+	    	  if (frequence.containsKey(c)) {
 	    		    Integer prev = frequence.get(c);
 	    		    frequence.put(c, prev+1);
 	    		}  else {
 	    			frequence.put(c, 1);
 	    		}
 	      }
-	      //hashmap des frequences
-	      System.out.println("Les occurences: " + frequence);
+//	      System.out.println("Les occurences: " + frequence);
 	      //List de lordre des cle de la hashmap
-	      List<Byte> freqSortedList = getWordInDescendingFreqOrder(frequence);
-	      for(int j =0; j<freqSortedList.size();j++ ){	    	  
-	    	  System.out.println(freqSortedList.get(j)+" = "+ byteToChar(freqSortedList.get(j) ) );
-	      }
+	      List<Character> freqSortedList = getWordInDescendingFreqOrder(frequence);
+//	      for(int j =0; j<freqSortedList.size();j++ ){	    	  
+//	    	  System.out.println(freqSortedList.get(j)+" = "+ byteToChar(freqSortedList.get(j) ) );
+//	      }
 	      
 	      //construit l'arbre binaire
 	      ArbreBinaire arbreBin = new ArbreBinaire(frequence, freqSortedList);
@@ -56,7 +67,7 @@ public class main {
 	      
 	      
 	      //TEST pour écrire notre file en binaire (string style)
-	      System.out.println(compressSuperTight);
+	     // System.out.println(compressSuperTight);
 	      PrintWriter writer = new PrintWriter("compressed.txt", "UTF-8");
 	      for(int i =0; i < compressSuperTight.size(); i++){
 	    	  writer.print( compressSuperTight.get(i) ); 
@@ -92,24 +103,24 @@ public class main {
 	 * @param wordCount une Map<Byte, Integer> contenant des byte et son nombres d'occurence
 	 * @return List<Byte> une liste de Byte trié en ordre décroissant du nombre d'occurence
 	 */
-	public static List<Byte> getWordInDescendingFreqOrder(Map<Byte, Integer> wordCount) {
+	public static List<Character> getWordInDescendingFreqOrder(Map<Character, Integer> wordCount) {
 		
 		//http://stackoverflow.com/questions/10158793/sorting-words-in-order-of-frequency-least-to-greatest
 	    // Convert map to list of <String,Integer> entries
-	    List<Map.Entry<Byte, Integer>> list = 
-	        new ArrayList< Map.Entry<Byte, Integer> >( wordCount.entrySet() );
+	    List<Map.Entry<Character, Integer>> list = 
+	        new ArrayList< Map.Entry<Character, Integer> >( wordCount.entrySet() );
 
 	    // Sort list by integer values
-	    Collections.sort(list, new Comparator<Map.Entry<Byte, Integer>>() {
-	        public int compare(Map.Entry<Byte, Integer> o1, Map.Entry<Byte, Integer> o2) {
+	    Collections.sort(list, new Comparator<Map.Entry<Character, Integer>>() {
+	        public int compare(Map.Entry<Character, Integer> o1, Map.Entry<Character, Integer> o2) {
 	            // compare o2 to o1, instead of o1 to o2, to get descending freq. order
 	            return (o2.getValue()).compareTo(o1.getValue());
 	        }
 	    });
 
 	    // Populate the result into a list
-	    List<Byte> result = new ArrayList<Byte>(); //on devrait populer le résultat dans un autre map pour garder le integer
-	    for (Map.Entry<Byte, Integer> entry : list) {
+	    List<Character> result = new ArrayList<Character>(); //on devrait populer le résultat dans un autre map pour garder le integer
+	    for (Map.Entry<Character, Integer> entry : list) {
 	        result.add(entry.getKey());   	
 	    	
 	    }

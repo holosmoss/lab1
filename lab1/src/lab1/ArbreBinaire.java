@@ -5,6 +5,7 @@ import java.nio.CharBuffer;
 import java.util.*;
 
 
+
 public class ArbreBinaire {
 	
 	private TreeSet<Node> nodeList;
@@ -15,6 +16,8 @@ public class ArbreBinaire {
 	private int tailleFichierText;
 	private String bitText;
 	private String decodedText;
+	private String header = "";
+	private Hashtable <Character,String> binaryValues = new Hashtable<Character,String>();
 	private Hashtable<String,Character> decodingTable = new Hashtable<String,Character>();
 	
 	/**
@@ -23,21 +26,29 @@ public class ArbreBinaire {
 	 * @param frequence hashMap contenant les bytes et leur fréquence
 	 * @param freqSortedList arrayList contenant les bytes triés
 	 */
-	public ArbreBinaire(Map<Byte, Integer> frequence, List<Byte> freqSortedList) {
+	public ArbreBinaire(Map<Character, Integer> frequence, List<Character> freqSortedList) {
 		
 		nodeList = new TreeSet<Node>();
 		
 		//créer les noeuds de chaque caractère(byte) avec leur fréquence
-		for(Byte b : freqSortedList){
-			Node n = new Node(b.byteValue(),frequence.get(b.byteValue() ));
-			nodeList.add(n);			
+		for(char b : freqSortedList){
+			Node n = new Node(b,frequence.get(b));
+			nodeList.add(n);	
+			header += b+"-"+frequence.get(b)+".";
 		}
 		
 		root = creerArbre(nodeList);
 		binaryNames(root);
 	}
 
-	
+	public String printHeader(){
+		//TODO relfect on this and its size and possible compression
+		//on doit avoir suffisament d<info pour recreer larbre
+		//char+freq de chq node
+		//comment on écrit ca ? encoder en bits puis hexa ?
+		
+		return header;
+	}
 	
 	public Node creerArbre(TreeSet<Node> nodeList2) {
 		
@@ -93,13 +104,18 @@ public class ArbreBinaire {
 			if(kidDroit != null){
 				kidDroit.binaryValue = parentBVal+"1";				
 				
-				if(!kidDroit.isLeaf){
+				if(kidDroit.isLeaf){
+					binaryValues.put(kidDroit.getLettre(),kidDroit.binaryValue);
+				}else{
 					binaryNames(kidDroit);
 				}
 			}
 			if(kidGauche != null){
 				kidGauche.binaryValue = parentBVal+"0";
-				if(!kidGauche.isLeaf){
+				if(kidGauche.isLeaf){
+					//System.out.println("add : "+kidGauche.getLettre()+" :: "+kidDroit.binaryValue);
+					binaryValues.put(kidGauche.getLettre(),kidGauche.binaryValue);
+				}else{
 					binaryNames(kidGauche);
 				}
 			}
@@ -113,41 +129,23 @@ public class ArbreBinaire {
 	 * 
 	 */
 	private String charToBit(Node node, String text){
-		Node kidDroit = node.getNodeDroit();
-		Node kidGauche = node.getNodeGauche();
-		String tmpText = text;
-//		si  l'enfant droit est une feuille
-		if(kidDroit != null && kidDroit.isLeaf)
-//			remplace tout les caractères comme la lettre de la feuille par sa valeur binaire
-//			garde le texte modifié dans le tempText
-			tmpText = tmpText.replaceAll(String.valueOf(byteToChar(kidDroit.lettre) ),
-							kidDroit.binaryValue);
-//		si  l'enfant gauche est une feuille
-		if(kidGauche != null && kidGauche.isLeaf)
-//			utilise le tempText  et continue de remplacer tout les caractères comme la lettre de la feuille par sa valeur binaire
-//			garde le texte modifié dans le tempText
-			tmpText = tmpText.replaceAll(String.valueOf(byteToChar(kidGauche.lettre) ),
-					kidGauche.binaryValue);
-		
-//		si l'enfant droit est un noeud 		
-		if(kidDroit != null && !kidDroit.isLeaf)
-//			on lui dit de compresser récursivement de son bord en sauvant encore dans temp
-			tmpText = charToBit(kidDroit,tmpText);
+		//TODO comment
+		StringBuffer tmpEncoded = new StringBuffer();
+	    for(int i = 0;i < text.length();i++){
+	    	if(binaryValues.containsKey(text.charAt(i))){
+		    	tmpEncoded.append(binaryValues.get(text.charAt(i)));
+	    	}else{
+	    		System.out.println("impossible values : "+text.charAt(i));
+	    	}
+	    }
 
-//		si l'enfant gauche est un noeud 
-		if(kidGauche != null && !kidGauche.isLeaf)
-//			on lui dit de compresser récursivement de son bord en sauvant encore dans temp
-			tmpText = charToBit(kidGauche,tmpText);
-		
-		
-		
-		return tmpText;
+		return tmpEncoded.toString();
 	}
 	
 	public ArrayList<Byte> doCompress(String text){
 		
 		String textEnBits = charToBit(this.root, text);
-		System.out.println(textEnBits);
+		//System.out.println(textEnBits);
 		
 		/*
 		 *Agrandi la String de text maintenant en bit pour quelle
@@ -204,12 +202,6 @@ public class ArbreBinaire {
 	}
 	
 	
-	public char byteToChar(byte b){ 
-		byte ba[] = {b};
-		StringBuilder buffer = new StringBuilder();
-	    buffer.append((char)ba[0]); 
-        return buffer.charAt(0);
-	}
 	
 	public void display48(String data){
 		 for(int cnt = 0;cnt < data.length();cnt += 48){
@@ -417,12 +409,12 @@ public class ArbreBinaire {
 		private boolean isLeaf; // s'il s'agit d'un noeud dit "feuille" de l'arbre binaire
 		private Node nodeDroit = null ; // lien vers prochain noeuf a sa droite
 		private Node nodeGauche = null; // lien vers prochain noeuf a sa gauche
-		private byte lettre; // la lettre en byte que contient le noeud
+		private Character lettre; // la lettre en byte que contient le noeud
 		private int freqLettre; // frequence de cette lettre
 		private Node parent; // valeur du noeud parent à ce noeud
 		
 		//constructeur
-		public Node(byte byteValue, int frequence) {
+		public Node(Character byteValue, int frequence) {
 			this.lettre = byteValue;
 			this.freqLettre = frequence;
 			this.isLeaf = true;
@@ -452,10 +444,10 @@ public class ArbreBinaire {
 		public void setNodeGauche(Node nodeGauche) {
 			this.nodeGauche = nodeGauche;
 		}
-		public Byte getLettre() {
+		public Character getLettre() {
 			return lettre;
 		}
-		public void setLettre(Byte lettre) {
+		public void setLettre(Character lettre) {
 			this.lettre = lettre;
 		}
 		public int getFreqLettre() {
@@ -473,7 +465,7 @@ public class ArbreBinaire {
 		
 		public String toString(){
 			
-			return ("lettre: "+byteToChar(this.lettre) +
+			return ("lettre: "+this.lettre +
 					" freq: " +this.freqLettre +
 					" "+ this.binaryValue);
 		}
