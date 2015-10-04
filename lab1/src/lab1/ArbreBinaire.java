@@ -42,12 +42,7 @@ public class ArbreBinaire {
 	public Node creerArbre(TreeSet<Node> nodeList2) {
 		
 		while(nodeList2.size() > 1){
-			
-			//enlève les deux noeuds de la fin
-			//node 1 est la moins frequente
-			//node 2 la deuxieme moins frequente
-//			Node left = nodeList2.remove( nodeList2.size() -1);
-//			Node right = nodeList2.remove( nodeList2.size() -1);
+			//on retire les 2 premier node 
 			Node left = nodeList2.first();
 			nodeList2.remove(left);
 			Node right = nodeList2.first();
@@ -57,18 +52,12 @@ public class ArbreBinaire {
 			
 			int newFreq = left.getFreqLettre() + right.getFreqLettre();
 			
-			//combine les deux noeuds dans un nouveau noeuds
+			//combine les deux node dans un nouveau noeuds
 			Node newNode = new Node(newFreq);
 			
-			//on sait deja lordre alors pas besoin de ce test la (1 droit, 2 gauche)
-			if( left.getFreqLettre() < right.getFreqLettre() ){
-				newNode.setNodeDroit(left);
-				newNode.setNodeGauche(right);
-			}
-			else{
-				newNode.setNodeDroit(right);
-				newNode.setNodeGauche(left);
-			}			
+			//on assigne les node comme enfant au noeud
+			newNode.setNodeDroit(right);
+			newNode.setNodeGauche(left);
 			
 			//est-ce vraiment necessaire ?
 			left.setParent(newNode);
@@ -272,21 +261,17 @@ public class ArbreBinaire {
 					" freq: " +this.freqLettre +
 					" "+ this.binaryValue);
 		}
-		//TODO make this our own
+		//adaptation de compareTo pour satisfaire les besoin de notre arbre (comparaison par fréquence)
 		public int compareTo(Object obj){
 		    Node theNode = (Node)obj;
-		    if (freqLettre == theNode.freqLettre){
-		      //The objects are in a tie based on the frequency
-		      // value.  Return a tiebreaker value based on the
-		      // relative hashCode values of the two objects.
-		      return (hashCode() - theNode.hashCode());
-		    }else{
-		      //Return negative or positive as this frequency is
-		      // less than or greater than the frequency value of
-		      // the object referred to by the parameter.
-		      return freqLettre - theNode.freqLettre;
-		    }//end else
-		  }//end compareTo
+		    if (freqLettre == theNode.freqLettre)
+		    	//test aléatoire pour résoudre les égalités
+		    	return (hashCode() - theNode.hashCode());
+		    else
+		    	//retourne negatif si notre fréquence est moindre que l'autre comparable
+		    	return freqLettre - theNode.freqLettre;
+		    
+		  }
 		
 
 	}
