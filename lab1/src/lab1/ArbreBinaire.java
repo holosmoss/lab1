@@ -113,7 +113,6 @@ public class ArbreBinaire {
 			if(kidGauche != null){
 				kidGauche.binaryValue = parentBVal+"0";
 				if(kidGauche.isLeaf){
-					//System.out.println("add : "+kidGauche.getLettre()+" :: "+kidDroit.binaryValue);
 					binaryValues.put(kidGauche.getLettre(),kidGauche.binaryValue);
 				}else{
 					binaryNames(kidGauche);
@@ -127,26 +126,30 @@ public class ArbreBinaire {
 	 * leur valeur binaire respective dans l'arbre puis 
 	 * retourne la String encodé...
 	 * 
+	 * référence : 
+	 * http://www.developer.com/java/other/article.php/3603066/
+	 * Understanding-the-Huffman-Data-Compression-Algorithm-in-Java.htm
 	 */
 	private String charToBit(Node node, String text){
 		//TODO comment
-		StringBuffer tmpEncoded = new StringBuffer();
+		StringBuffer strBuffer = new StringBuffer();
+		
 	    for(int i = 0;i < text.length();i++){
 	    	if(binaryValues.containsKey(text.charAt(i))){
-		    	tmpEncoded.append(binaryValues.get(text.charAt(i)));
+	    		strBuffer.append(binaryValues.get(text.charAt(i)));
 	    	}else{
 	    		System.out.println("impossible values : "+text.charAt(i));
 	    	}
 	    }
 
-		return tmpEncoded.toString();
+		return strBuffer.toString();
 	}
 	
-	//public ArrayList<Byte> doCompress(String text){
-	public String doCompress(String text){
-
+	
+public byte[] doCompress(String text){
 		
 		String textEnBits = charToBit(this.root, text);
+		
 		
 		/*
 		 *Agrandi la String de text maintenant en bit pour quelle
@@ -156,9 +159,28 @@ public class ArbreBinaire {
 		for(int i = 0;i < (8 - bitRestant);i++){
 			textEnBits += "0";
 		}
-	    System.out.println("--Encodedbits--------------------------------------------------------");
-	    display48(textEnBits);
-		return textEnBits;
+		
+		display48(textEnBits);
+		
+		/*
+		 * Divise la String de text maintenant en bits par échantillon de 8 bits(1octet)
+		 * puis match-up l'octet avec la table binaire et ajoute le résultat
+		 * dans l'arrayList de byte
+		 */
+		for(int j = 0;j < textEnBits.length();j += 8){
+			//prend les 8 premiers caractère de la string
+			String tempString  = textEnBits.substring(j,j+8);
+			//cherche dans la table binaire
+			byte bitsSample = this.tableBinaire.get(tempString);			  
+			compressedData.add(bitsSample);			
+		}
+		
+		byte tabByte[] = new byte[compressedData.size()];
+		for(int u = 0;u < compressedData.size(); u++)
+			tabByte[u] = compressedData.get(u);
+		
+		
+		return tabByte;
 	}
 
 	/**
@@ -187,7 +209,12 @@ public class ArbreBinaire {
 	}
 	
 	
-	
+	/**
+	 * Petit fonction pour afficher de très grande string sur plusieurs ligne
+	 * référence : 
+	 * http://www.developer.com/java/other/article.php/3603066/
+	 * Understanding-the-Huffman-Data-Compression-Algorithm-in-Java.htm
+	 */
 	public void display48(String data){
 		 for(int cnt = 0;cnt < data.length();cnt += 48){
 		   if((cnt + 48) < data.length()){
@@ -205,7 +232,7 @@ public class ArbreBinaire {
 	 * binaire qu'un octet peux prendre. On s'en servira pour faire un match-up
 	 * lors de l'encodage
 	 * 
-	 *  référence : 
+	 * référence : 
 	 * http://www.developer.com/java/other/article.php/3603066/
 	 * Understanding-the-Huffman-Data-Compression-Algorithm-in-Java.htm
 	 */
@@ -335,8 +362,8 @@ public class ArbreBinaire {
 	 *  dans une autre table pour le décodage. Soit <Character, String>
 	 *  devient <String, Character>. L'idée ici est d'avoir une table qui
 	 *  retourne un caractère lorsqu'on fait table.get(String) -> retourne character
-	 *  ça sera utile pour le décodage du string ex 0101010100101010101000111010111
-	 *  en caractère AAAAABBBBCCCDDE
+	 *  ça sera utile pour le décodage du string ex: 0101010100101010101000111010111
+	 *  en caractère AABBCCDDEE
 	 *  
 	 *  référence : 
 	 * http://www.developer.com/java/other/article.php/3603066/
