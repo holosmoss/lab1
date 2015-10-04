@@ -50,10 +50,12 @@ public class main {
 	      
 	      
 	      //TEST pour écrire notre file en binaire (string style)
-	      System.out.println(compressSuperTight);
-	      PrintWriter writer = new PrintWriter("compressed.txt", "UTF-8");
+	      //System.out.println(wholeString);
+	      //System.out.println(compressSuperTight);
+	      PrintWriter writer = new PrintWriter("compressed.huf", "US-ASCII");
 	      writer.println(compressSuperTight);
 	      writer.close();
+	      //TODO test encoding ^?
 	      
 //	      TODO test this method whit byte[] instead of string
 //	      byte dataToWrite[] = //...
