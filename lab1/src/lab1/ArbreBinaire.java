@@ -4,9 +4,10 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.*;
 
+
 public class ArbreBinaire {
 	
-	private ArrayList<Node> nodeList;
+	private TreeSet<Node> nodeList;
 	private Node root;
 	private Hashtable <String,Byte> tableBinaire = new Hashtable<String,Byte>();
 	private ArrayList<Byte> compressedData = new ArrayList<Byte>();
@@ -19,7 +20,7 @@ public class ArbreBinaire {
 	 */
 	public ArbreBinaire(Map<Byte, Integer> frequence, List<Byte> freqSortedList) {
 		
-		nodeList = new ArrayList<Node>();
+		nodeList = new TreeSet<Node>();
 		
 		//créer les noeuds de chaque caractère(byte) avec leur fréquence
 		for(Byte b : freqSortedList){
@@ -33,36 +34,37 @@ public class ArbreBinaire {
 
 	
 	
-	public Node creerArbre(ArrayList<Node> nodeList2) {
+	public Node creerArbre(TreeSet<Node> nodeList2) {
 		
 		while(nodeList2.size() > 1){
 			
-			//enlève les deux noeuds de la fin
-			Node tmpNode1 = nodeList2.remove( nodeList2.size() -1);
-			Node tmpNode2 = nodeList2.remove( nodeList2.size() -1);
+			//on retire les 2 premier node 
+			Node left = nodeList2.first();
+			nodeList2.remove(left);
+			Node right = nodeList2.first();
+		    nodeList2.remove(right);
 			
-			int newFreq = tmpNode1.getFreqLettre() + tmpNode2.getFreqLettre();
 			
-			//combine les deux noeuds dans un nouveau noeuds
+			
+			int newFreq = left.getFreqLettre() + right.getFreqLettre();
+			
+			//combine les deux node dans un nouveau noeuds
 			Node newNode = new Node(newFreq);
 			
-			if( tmpNode1.getFreqLettre() < tmpNode2.getFreqLettre() ){
-				newNode.setNodeDroit(tmpNode1);
-				newNode.setNodeGauche(tmpNode2);
-			}
-			else{
-				newNode.setNodeDroit(tmpNode2);
-				newNode.setNodeGauche(tmpNode1);
-			}			
-			tmpNode1.setParent(newNode);
-			tmpNode2.setParent(newNode);
+			//on assigne les node comme enfant au noeud
+			newNode.setNodeDroit(right);
+			newNode.setNodeGauche(left);
+			
+			//est-ce vraiment necessaire ?
+			left.setParent(newNode);
+			right.setParent(newNode);
 			
 			//ajoute le nouveau noeud à la fin
 			nodeList2.add(newNode);
 		}
 		
 		//return le noeud/racine de l'arbre
-		return nodeList2.get(0);
+		return nodeList2.first();
 		
 	}
 	
@@ -194,7 +196,7 @@ public class ArbreBinaire {
 		return result;
 	}
 
-	public ArrayList<Node> getNodeList() {
+	public TreeSet<Node> getNodeList() {
 		return nodeList;
 	}
 	
@@ -277,7 +279,7 @@ public class ArbreBinaire {
 	 * @author Joel
 	 *
 	 */
-	private class Node {
+	private class Node implements Comparable<Node>{
 		
 		private String binaryValue = ""; // ex 111 pour la lettre totalement à droite
 		private boolean isLeaf; // s'il s'agit d'un noeud dit "feuille" de l'arbre binaire
@@ -343,7 +345,16 @@ public class ArbreBinaire {
 					" freq: " +this.freqLettre +
 					" "+ this.binaryValue);
 		}
-		
+		//adaptation de compareTo pour satisfaire les besoin de notre arbre (comparaison par fréquence)
+		public int compareTo(Node otherNode){
+		    if (freqLettre == otherNode.freqLettre)
+		    	//test aléatoire pour résoudre les égalités
+		    	return (hashCode() - otherNode.hashCode());
+		    else
+		    	//retourne negatif si notre fréquence est moindre que l'autre comparable
+		    	return freqLettre - otherNode.freqLettre;
+		}
+
 		
 
 	}
