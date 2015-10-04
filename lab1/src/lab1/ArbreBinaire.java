@@ -8,6 +8,8 @@ public class ArbreBinaire {
 	
 	private ArrayList<Node> nodeList;
 	private Node root;
+	private Hashtable <String,Byte> tableBinaire = new Hashtable<String,Byte>();
+	private ArrayList<Byte> compressedData = new ArrayList<Byte>();
 	
 	/**
 	 * Constructeur qui créer l'abre binaire pour l'encodage
@@ -27,12 +29,6 @@ public class ArbreBinaire {
 		
 		root = creerArbre(nodeList);
 		binaryNames(root);
-		
-//		System.out.println(root.toString() );
-//		System.out.println(root.getNodeDroit().toString() );
-//		System.out.println(root.getNodeGauche().toString() );
-//		System.out.println(root.getNodeDroit().getNodeDroit().toString() );
-//		System.out.println(root.getNodeDroit().getNodeGauche().toString() );
 	}
 
 	
@@ -111,7 +107,7 @@ public class ArbreBinaire {
 	 * retourne la String encodé...
 	 * 
 	 */
-	private String compress(Node node, String text){
+	private String charToBit(Node node, String text){
 		Node kidDroit = node.getNodeDroit();
 		Node kidGauche = node.getNodeGauche();
 		String tmpText = text;
@@ -131,20 +127,50 @@ public class ArbreBinaire {
 //		si l'enfant droit est un noeud 		
 		if(kidDroit != null && !kidDroit.isLeaf)
 //			on lui dit de compresser récursivement de son bord en sauvant encore dans temp
-			tmpText = compress(kidDroit,tmpText);
+			tmpText = charToBit(kidDroit,tmpText);
 
 //		si l'enfant gauche est un noeud 
 		if(kidGauche != null && !kidGauche.isLeaf)
 //			on lui dit de compresser récursivement de son bord en sauvant encore dans temp
-			tmpText = compress(kidGauche,tmpText);
+			tmpText = charToBit(kidGauche,tmpText);
 		
 		
-
+		
 		return tmpText;
 	}
 	
-	public String doCompress(String text){
-		return compress(this.root, text);
+	public ArrayList<Byte> doCompress(String text){
+		
+		String textEnBits = charToBit(this.root, text);
+		System.out.println(textEnBits);
+		
+		/*
+		 *Agrandi la String de text maintenant en bit pour quelle
+		 *soit de longueur multiple de 8
+		 */
+		int bitRestant = textEnBits.length()%8;
+		for(int i = 0;i < (8 - bitRestant);i++){
+			textEnBits += "0";
+		}
+		//System.out.println(textEnBits);
+		display48(textEnBits);
+		
+		/*
+		 * Divise la String de text maintenant en bits par échantillon de 8 bits(1octet)
+		 * puis match-up l'octet avec la table binaire et ajoute le résultat
+		 * dans l'arrayList de byte
+		 */
+		for(int j = 0;j < textEnBits.length();j += 8){
+			//prend les 8 premiers caractère de la string
+			String tempString  = textEnBits.substring(j,j+8);
+			//cherche dans la table binaire
+			byte bitsSample = this.tableBinaire.get(tempString);
+			  
+			compressedData.add(bitsSample);
+		}		
+		
+		
+		return this.compressedData;
 	}
 
 	/**
@@ -172,16 +198,77 @@ public class ArbreBinaire {
 		return nodeList;
 	}
 	
-	/**
-	 * 
-	 * @param b
-	 * @return
-	 */
+	
 	public char byteToChar(byte b){ 
 		byte ba[] = {b};
 		StringBuilder buffer = new StringBuilder();
 	    buffer.append((char)ba[0]); 
         return buffer.charAt(0);
+	}
+	
+	public void display48(String data){
+		 for(int cnt = 0;cnt < data.length();cnt += 48){
+		   if((cnt + 48) < data.length()){
+		     //Display 48 characters.
+		     System.out.println(data.substring(cnt,cnt+48));
+		   }else{
+		     //Display the final line, which may be short.
+		     System.out.println(data.substring(cnt));
+		   }//end else
+		 }//end for loop
+		}
+	
+	/**
+	 * Fonction qui créer une table binaire de tous les possibilités
+	 * binaire qu'un octet peux prendre. On s'en servira pour faire un match-up
+	 * lors de l'encodage
+	 */
+	public	void tableBinaire(){
+
+		for(int i = 0; i <= 255;i++){
+			StringBuffer strBuffer = new StringBuffer();
+			if((i & 128) > 0)   
+				strBuffer.append("1");   
+			else
+				strBuffer.append("0");
+			   
+			if((i & 64) > 0)
+				strBuffer.append("1");
+			else
+				strBuffer.append("0");
+			   
+			if((i & 32) > 0)
+				strBuffer.append("1");
+			else
+				strBuffer.append("0");
+			   
+			if((i & 16) > 0)
+				strBuffer.append("1");
+			else
+				strBuffer.append("0");
+			   
+			if((i & 8) > 0)
+				strBuffer.append("1");
+			else 
+				strBuffer.append("0");
+			   
+			if((i & 4) > 0)
+				strBuffer.append("1");
+			else 
+				strBuffer.append("0");
+			   
+			if((i & 2) > 0)
+				strBuffer.append("1");
+			else
+				strBuffer.append("0");
+			   
+			if((i & 1) > 0)
+				strBuffer.append("1");
+			else
+				strBuffer.append("0");
+			   
+			this.tableBinaire.put(strBuffer.toString(),(byte)(i));		   
+		 }
 	}
 	
 	

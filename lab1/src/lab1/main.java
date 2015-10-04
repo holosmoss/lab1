@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 public class main {
-	//branche aimeric
+	
 	public static void main(String[] args) throws IOException{
 		
 		  BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -28,6 +28,7 @@ public class main {
 	      Path path = file.toPath();
 	      byte [] b = Files.readAllBytes(path);
 	      String wholeString = new String(b, Charset.defaultCharset() );
+	      //display48(wholeString);
 	      Map <Byte,Integer> frequence = new HashMap <Byte,Integer>();
 	      for(byte c : b){
 	    	  	if (frequence.containsKey(c)) {
@@ -38,21 +39,27 @@ public class main {
 	    		}
 	      }
 	      //hashmap des frequences
-	      //System.out.println("Les occurences: " + frequence);
+	      System.out.println("Les occurences: " + frequence);
 	      //List de lordre des cle de la hashmap
 	      List<Byte> freqSortedList = getWordInDescendingFreqOrder(frequence);
-	      //System.out.println("La liste trié: "+freqSortedList);
+	      for(int j =0; j<freqSortedList.size();j++ ){	    	  
+	    	  System.out.println(freqSortedList.get(j)+" = "+ byteToChar(freqSortedList.get(j) ) );
+	      }
 	      
 	      //construit l'arbre binaire
 	      ArbreBinaire arbreBin = new ArbreBinaire(frequence, freqSortedList);
+	      arbreBin.tableBinaire();
 	      //System.out.println( "la liste de noeud: "+ arbreBin.printNodeList( arbreBin.getNodeList() ) );
-	      String compressSuperTight = arbreBin.doCompress(wholeString);
+	      ArrayList<Byte> compressSuperTight = arbreBin.doCompress(wholeString);
 	      
 	      
 	      //TEST pour écrire notre file en binaire (string style)
 	      System.out.println(compressSuperTight);
 	      PrintWriter writer = new PrintWriter("compressed.txt", "UTF-8");
-	      writer.println(compressSuperTight);
+	      for(int i =0; i < compressSuperTight.size(); i++){
+	    	  writer.print( compressSuperTight.get(i) ); 
+	      }
+	      
 	      writer.close();
 	      
 //	      TODO test this method whit byte[] instead of string
@@ -61,6 +68,18 @@ public class main {
 //		  out.write(dataToWrite);
 //		  out.close();
 	}
+	
+	public static void display48(String data){
+		 for(int cnt = 0;cnt < data.length();cnt += 48){
+		   if((cnt + 48) < data.length()){
+		     //Display 48 characters.
+		     System.out.println(data.substring(cnt,cnt+48));
+		   }else{
+		     //Display the final line, which may be short.
+		     System.out.println(data.substring(cnt));
+		   }//end else
+		 }//end for loop
+		}
 	
 	/**
 	 * 
@@ -92,4 +111,13 @@ public class main {
 	    return result;
 	    
 	}
+	
+	public static char byteToChar(byte b){ 
+		byte ba[] = {b};
+		StringBuilder buffer = new StringBuilder();
+	    buffer.append((char)ba[0]); 
+        return buffer.charAt(0);
+	}
+	
+	
 }
