@@ -50,6 +50,8 @@ public class main {
 	      ArbreBinaire arbreBin = new ArbreBinaire(frequence, freqSortedList);
 	      arbreBin.tableBinaire();
 	      //System.out.println( "la liste de noeud: "+ arbreBin.printNodeList( arbreBin.getNodeList() ) );
+	      
+	      //compressSuperTigh représente nos byte compressé
 	      ArrayList<Byte> compressSuperTight = arbreBin.doCompress(wholeString);
 	      
 	      
@@ -58,8 +60,7 @@ public class main {
 	      PrintWriter writer = new PrintWriter("compressed.txt", "UTF-8");
 	      for(int i =0; i < compressSuperTight.size(); i++){
 	    	  writer.print( compressSuperTight.get(i) ); 
-	      }
-	      
+	      }	      
 	      writer.close();
 	      
 //	      TODO test this method whit byte[] instead of string
@@ -67,6 +68,11 @@ public class main {
 //		  FileOutputStream out = new FileOutputStream("the-file-name");
 //		  out.write(dataToWrite);
 //		  out.close();
+	      
+	      
+	      //décompression
+	     // arbreBin.decompress(compressSuperTight, encodingTable, wholeString.length() );
+	      
 	}
 	
 	public static void display48(String data){

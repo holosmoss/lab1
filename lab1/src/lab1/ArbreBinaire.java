@@ -9,8 +9,13 @@ public class ArbreBinaire {
 	
 	private TreeSet<Node> nodeList;
 	private Node root;
-	private Hashtable <String,Byte> tableBinaire = new Hashtable<String,Byte>();
+	private Hashtable<String,Byte> tableBinaire = new Hashtable<String,Byte>();
 	private ArrayList<Byte> compressedData = new ArrayList<Byte>();
+	private Hashtable<Character,String> encodingTable;
+	private int tailleFichierText;
+	private String bitText;
+	private String decodedText;
+	private Hashtable<String,Character> decodingTable = new Hashtable<String,Character>();
 	
 	/**
 	 * Constructeur qui créer l'abre binaire pour l'encodage
@@ -42,9 +47,7 @@ public class ArbreBinaire {
 			Node left = nodeList2.first();
 			nodeList2.remove(left);
 			Node right = nodeList2.first();
-		    nodeList2.remove(right);
-			
-			
+		    nodeList2.remove(right);		
 			
 			int newFreq = left.getFreqLettre() + right.getFreqLettre();
 			
@@ -224,6 +227,10 @@ public class ArbreBinaire {
 	 * Fonction qui créer une table binaire de tous les possibilités
 	 * binaire qu'un octet peux prendre. On s'en servira pour faire un match-up
 	 * lors de l'encodage
+	 * 
+	 *  référence : 
+	 * http://www.developer.com/java/other/article.php/3603066/
+	 * Understanding-the-Huffman-Data-Compression-Algorithm-in-Java.htm
 	 */
 	public	void tableBinaire(){
 
@@ -273,6 +280,131 @@ public class ArbreBinaire {
 		 }
 	}
 	
+	// ==========================================================
+	// décodage
+	//
+	
+	/**
+	 * Fonction qui décompress un arrayList<Byte>
+	 * selon les données encodé de l'arbre binaire dans CharBitValueTable
+	 * la taille du fichier text original est nécéssaire pour enlever
+	 * les caractères superflus ajouter lors de la compression.
+	 * 
+	 * référence : 
+	 * http://www.developer.com/java/other/article.php/3603066/
+	 * Understanding-the-Huffman-Data-Compression-Algorithm-in-Java.htm
+	 * 
+	 * @param compressedData - ArrayList<Byte> Le texte du fichier texte compressé
+	 * @param CharBitValueTable - Hashtable <Character,String> la table de caractère et leur valeur
+	 * 							  binaire dans l'arbre binaire. 
+	 * @param tailleFichierText - int - la longueur du texte original
+	 * @return une chaine de caractère contenant le text décompressé
+	 */
+	public String decompress(ArrayList <Byte>compressedData,
+            	  			 Hashtable <Character,String>encodingTable,
+            	  			 int tailleFichierText){
+		
+		//garde en mémoire les valeurs reçu en paramètre
+		//ça évite de les passer en paramètre par la suite
+		this.compressedData = compressedData;
+		this.encodingTable = encodingTable;
+			
+		
+		//créer une table des possiblités binaire d'un octet pour le décodage
+		tableBinaire();
+		
+		//décode l'array de Byte en une chaine de bit (bitText)
+		decodeByteToStringBit();
+		
+		//créer la table de décodage (decodingTable)
+		DecodingTable();
+		
+		
+		//décode la chaine de bit (decodedText)
+		BitToChar();
+		
+		//retourne le text décompressé et décodé, et supprime les 0 ajoutés
+		//lors de l'encodage
+		return this.decodedText.substring(0,tailleFichierText);
+	}
+	
+	/**
+	 * Fonction qui décode chaque byte du arrayList<Byte> 
+	 * et construit une String de 0 et de 1
+	 * 
+	 * référence : 
+	 * http://www.developer.com/java/other/article.php/3603066/
+	 * Understanding-the-Huffman-Data-Compression-Algorithm-in-Java.htm
+	 */
+	public void decodeByteToStringBit(){
+		StringBuffer strBuffer = new StringBuffer();
+
+		//fait correspondre chaque byte du arrayList à la table binaire
+		//pour faire un match-up
+		for(Byte b : this.compressedData){
+			byte byteTmp = b;
+			strBuffer.append(this.tableBinaire.get(byteTmp));
+		}
+		
+		this.bitText = strBuffer.toString();
+		
+		System.out.println("nString Decoded Data");
+		display48(bitText);
+
+	}
+	
+	/**
+	 *  Fonction qui interverti la table d'encodage CharBitValueTable
+	 *  dans une autre table pour le décodage. Soit <Character, String>
+	 *  devient <String, Character>. L'idée ici est d'avoir une table qui
+	 *  retourne un caractère lorsqu'on fait table.get(String) -> retourne character
+	 *  ça sera utile pour le décodage du string ex 0101010100101010101000111010111
+	 *  en caractère AAAAABBBBCCCDDE
+	 *  
+	 *  référence : 
+	 * http://www.developer.com/java/other/article.php/3603066/
+	 * Understanding-the-Huffman-Data-Compression-Algorithm-in-Java.htm
+	 */
+	public void DecodingTable(){
+		
+		Enumeration<Character> enumerator = this.encodingTable.keys();
+		
+		while(enumerator.hasMoreElements() ){
+			Character nextKey = enumerator.nextElement();
+			String nextString = this.encodingTable.get(nextKey);
+			decodingTable.put(nextString,nextKey);
+		}
+	}
+	
+	/**
+	 * On utilise deux buffer de string, un pour construire l'output 
+	 * qui sera notre text fully decompressé, et l'autre comme tampon.
+	 * On ajoute dans le buffer tampon le caractère en bit à la postion
+	 * de l'iterateur de la boucle for puis on vérifie si ce dernier
+	 * ce retrouve dans la table de décodage, si oui, on l'ajoute
+	 * à l'output
+	 * 
+	 * référence : 
+	 * http://www.developer.com/java/other/article.php/3603066/
+	 * Understanding-the-Huffman-Data-Compression-Algorithm-in-Java.htm
+	 */
+	public void BitToChar(){
+		
+		StringBuffer output = new StringBuffer();
+		StringBuffer strBuffer = new StringBuffer();
+
+		for(int i = 0; i < this.bitText.length(); i++){
+			
+			strBuffer.append( this.bitText.charAt(i) );
+			
+			if(decodingTable.containsKey( strBuffer.toString() ) ){
+		    	output.append( decodingTable.get( strBuffer.toString() ) );
+		    	strBuffer = new StringBuffer();
+			}
+		}
+		 
+		this.decodedText = output.toString();
+	}
 	
 	/**
 	 * Classe interne pour créer des noeuds dans l'arbre binaire
