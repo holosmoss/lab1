@@ -38,23 +38,24 @@ public class main {
 	    		}
 	      }
 	      //hashmap des frequences
-	      //System.out.println("Les occurences: " + frequence);
+	      System.out.println("Les occurences: " + frequence);
 	      //List de lordre des cle de la hashmap
 	      List<Byte> freqSortedList = getWordInDescendingFreqOrder(frequence);
-	      //System.out.println("La liste trié: "+freqSortedList);
+	      System.out.println("La liste trié: "+freqSortedList);
 	      
 	      //construit l'arbre binaire
 	      ArbreBinaire arbreBin = new ArbreBinaire(frequence, freqSortedList);
-	      //System.out.println( "la liste de noeud: "+ arbreBin.printNodeList( arbreBin.getNodeList() ) );
+	     // System.out.println( "la liste de noeud: "+ arbreBin.printNodeList( arbreBin.getNodeList() ) );
+	
 	      String compressSuperTight = arbreBin.doCompress(wholeString);
 	      
 	      
 	      //TEST pour écrire notre file en binaire (string style)
 	      //System.out.println(wholeString);
 	      //System.out.println(compressSuperTight);
-	      PrintWriter writer = new PrintWriter("compressed.huf", "US-ASCII");
-	      writer.println(compressSuperTight);
-	      writer.close();
+//	      PrintWriter writer = new PrintWriter("compressed.huf", "US-ASCII");
+//	      writer.println(compressSuperTight);
+//	      writer.close();
 	      //TODO test encoding ^?
 	      
 //	      TODO test this method whit byte[] instead of string

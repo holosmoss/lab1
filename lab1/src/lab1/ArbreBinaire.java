@@ -4,9 +4,11 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.*;
 
+
+
 public class ArbreBinaire {
 	
-	private ArrayList<Node> nodeList;
+	private TreeSet<Node> nodeList;
 	private Node root;
 	
 	/**
@@ -17,7 +19,7 @@ public class ArbreBinaire {
 	 */
 	public ArbreBinaire(Map<Byte, Integer> frequence, List<Byte> freqSortedList) {
 		
-		nodeList = new ArrayList<Node>();
+		nodeList = new TreeSet<Node>();
 		
 		//créer les noeuds de chaque caractère(byte) avec leur fréquence
 		for(Byte b : freqSortedList){
@@ -37,36 +39,47 @@ public class ArbreBinaire {
 
 	
 	
-	public Node creerArbre(ArrayList<Node> nodeList2) {
+	public Node creerArbre(TreeSet<Node> nodeList2) {
 		
 		while(nodeList2.size() > 1){
 			
 			//enlève les deux noeuds de la fin
-			Node tmpNode1 = nodeList2.remove( nodeList2.size() -1);
-			Node tmpNode2 = nodeList2.remove( nodeList2.size() -1);
+			//node 1 est la moins frequente
+			//node 2 la deuxieme moins frequente
+//			Node left = nodeList2.remove( nodeList2.size() -1);
+//			Node right = nodeList2.remove( nodeList2.size() -1);
+			Node left = nodeList2.first();
+			nodeList2.remove(left);
+			Node right = nodeList2.first();
+		    nodeList2.remove(right);
 			
-			int newFreq = tmpNode1.getFreqLettre() + tmpNode2.getFreqLettre();
+			
+			
+			int newFreq = left.getFreqLettre() + right.getFreqLettre();
 			
 			//combine les deux noeuds dans un nouveau noeuds
 			Node newNode = new Node(newFreq);
 			
-			if( tmpNode1.getFreqLettre() < tmpNode2.getFreqLettre() ){
-				newNode.setNodeDroit(tmpNode1);
-				newNode.setNodeGauche(tmpNode2);
+			//on sait deja lordre alors pas besoin de ce test la (1 droit, 2 gauche)
+			if( left.getFreqLettre() < right.getFreqLettre() ){
+				newNode.setNodeDroit(left);
+				newNode.setNodeGauche(right);
 			}
 			else{
-				newNode.setNodeDroit(tmpNode2);
-				newNode.setNodeGauche(tmpNode1);
+				newNode.setNodeDroit(right);
+				newNode.setNodeGauche(left);
 			}			
-			tmpNode1.setParent(newNode);
-			tmpNode2.setParent(newNode);
+			
+			//est-ce vraiment necessaire ?
+			left.setParent(newNode);
+			right.setParent(newNode);
 			
 			//ajoute le nouveau noeud à la fin
 			nodeList2.add(newNode);
 		}
 		
 		//return le noeud/racine de l'arbre
-		return nodeList2.get(0);
+		return nodeList2.first();
 		
 	}
 	
@@ -119,12 +132,15 @@ public class ArbreBinaire {
 		if(kidDroit != null && kidDroit.isLeaf)
 //			remplace tout les caractères comme la lettre de la feuille par sa valeur binaire
 //			garde le texte modifié dans le tempText
+			System.out.println(String.valueOf(byteToChar(kidDroit.lettre))+" "+kidDroit.binaryValue);
+
 			tmpText = tmpText.replaceAll(String.valueOf(byteToChar(kidDroit.lettre) ),
 							kidDroit.binaryValue);
 //		si  l'enfant gauche est une feuille
 		if(kidGauche != null && kidGauche.isLeaf)
 //			utilise le tempText  et continue de remplacer tout les caractères comme la lettre de la feuille par sa valeur binaire
 //			garde le texte modifié dans le tempText
+			System.out.println(String.valueOf(byteToChar(kidGauche.lettre))+" "+kidGauche.binaryValue);
 			tmpText = tmpText.replaceAll(String.valueOf(byteToChar(kidGauche.lettre) ),
 					kidGauche.binaryValue);
 		
@@ -168,7 +184,7 @@ public class ArbreBinaire {
 		return result;
 	}
 
-	public ArrayList<Node> getNodeList() {
+	public TreeSet<Node> getNodeList() {
 		return nodeList;
 	}
 	
@@ -190,7 +206,7 @@ public class ArbreBinaire {
 	 * @author Joel
 	 *
 	 */
-	private class Node {
+	private class Node implements Comparable{
 		
 		private String binaryValue = ""; // ex 111 pour la lettre totalement à droite
 		private boolean isLeaf; // s'il s'agit d'un noeud dit "feuille" de l'arbre binaire
@@ -256,7 +272,21 @@ public class ArbreBinaire {
 					" freq: " +this.freqLettre +
 					" "+ this.binaryValue);
 		}
-		
+		//TODO make this our own
+		public int compareTo(Object obj){
+		    Node theNode = (Node)obj;
+		    if (freqLettre == theNode.freqLettre){
+		      //The objects are in a tie based on the frequency
+		      // value.  Return a tiebreaker value based on the
+		      // relative hashCode values of the two objects.
+		      return (hashCode() - theNode.hashCode());
+		    }else{
+		      //Return negative or positive as this frequency is
+		      // less than or greater than the frequency value of
+		      // the object referred to by the parameter.
+		      return freqLettre - theNode.freqLettre;
+		    }//end else
+		  }//end compareTo
 		
 
 	}
