@@ -1,7 +1,9 @@
 package lab1;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,16 +31,11 @@ public class main {
 	      Path path = file.toPath();
 	      byte [] b = Files.readAllBytes(path);
 	      String wholeString = new String(b, StandardCharsets.UTF_8 );
-	      //display48(wholeString);
-//	      Map <Byte,Integer> frequence = new HashMap <Byte,Integer>();
-//	      for(byte c : b){
-//	    	  	if (frequence.containsKey(c)) {
-//	    		    Integer prev = frequence.get(c);
-//	    		    frequence.put(c, prev+1);
-//	    		}  else {
-//	    			frequence.put(c, 1);
-//	    		}
-//	      }
+	      //VIEWING
+	      display48(wholeString);
+	      System.out.println("--displayRawDataAsBits--------------------------------------------------------");
+	      displayRawDataAsBits(wholeString);
+
 	      //hashmap des frequences
 	      Map <Character,Integer> frequence = new HashMap <Character,Integer>();
 	      for(int i = 0;i < wholeString.length();i++){
@@ -63,29 +60,32 @@ public class main {
 	      //System.out.println( "la liste de noeud: "+ arbreBin.printNodeList( arbreBin.getNodeList() ) );
 	      
 	      //compressSuperTigh représente nos byte compressé
-	      ArrayList<Byte> compressSuperTight = arbreBin.doCompress(wholeString);
+	      String compressSuperTight = arbreBin.doCompress(wholeString);
+	      byte[] data = decodeBinary(compressSuperTight);
+	      java.nio.file.Files.write(new File("file.txt").toPath(), data);
 	      
-	      
-	      //TEST pour écrire notre file en binaire (string style)
-	     // System.out.println(compressSuperTight);
-	      PrintWriter writer = new PrintWriter("compressed.txt", "UTF-8");
-	      for(int i =0; i < compressSuperTight.size(); i++){
-	    	  writer.print( compressSuperTight.get(i) ); 
-	      }	      
-	      writer.close();
-	      
-//	      TODO test this method whit byte[] instead of string
-//	      byte dataToWrite[] = //...
-//		  FileOutputStream out = new FileOutputStream("the-file-name");
-//		  out.write(dataToWrite);
-//		  out.close();
 	      
 	      
 	      //décompression
 	     // arbreBin.decompress(compressSuperTight, encodingTable, wholeString.length() );
 	      
 	}
-	
+	private static byte[] decodeBinary(String s) {
+		//http://stackoverflow.com/questions/27668994/writing-binary-from-string-to-file
+		//merci stackoverflow :)
+	    if (s.length() % 8 != 0) throw new IllegalArgumentException(
+	        "Binary data length must be multiple of 8");
+	    byte[] data = new byte[s.length() / 8];
+	    for (int i = 0; i < s.length(); i++) {
+	        char c = s.charAt(i);
+	        if (c == '1') {
+	            data[i >> 3] |= 0x80 >> (i & 0x7);
+	        } else if (c != '0') {
+	            throw new IllegalArgumentException("Invalid char in binary string");
+	        }
+	    }
+	    return data;
+	}
 	public static void display48(String data){
 		 for(int cnt = 0;cnt < data.length();cnt += 48){
 		   if((cnt + 48) < data.length()){
@@ -129,12 +129,31 @@ public class main {
 	    
 	}
 	
-	public static char byteToChar(byte b){ 
-		byte ba[] = {b};
-		StringBuilder buffer = new StringBuilder();
-	    buffer.append((char)ba[0]); 
-        return buffer.charAt(0);
-	}
-	
+
+	 //-----------------------------------------------------//
+	  
+	  //This method displays a message string as a series of
+	  // characters each having a value of 1 or 0.
+	 private static void displayRawDataAsBits(String rawData){
+	    for(int cnt = 0,charCnt = 0;cnt < rawData.length();
+	                                          cnt++,charCnt++){
+	      char theCharacter = rawData.charAt(cnt);
+	      String binaryString = Integer.toBinaryString(
+	                                             theCharacter);
+	      //Append leading zeros as necessary to show eight
+	      // bits per character.
+	      while(binaryString.length() < 8){
+	        binaryString = "0" + binaryString;
+	      }//end while loop
+	      if(charCnt%6 == 0){
+	        //Display 48 bits per line.
+	        charCnt = 0;
+	        System.out.println();//new line
+	      }//end if
+	      System.out.print(binaryString);
+	    }//end for loop
+	    System.out.println();
+	  }//end displayRawDataAsBits
+	  //-----------------------------------------------------//
 	
 }

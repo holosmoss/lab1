@@ -142,10 +142,11 @@ public class ArbreBinaire {
 		return tmpEncoded.toString();
 	}
 	
-	public ArrayList<Byte> doCompress(String text){
+	//public ArrayList<Byte> doCompress(String text){
+	public String doCompress(String text){
+
 		
 		String textEnBits = charToBit(this.root, text);
-		//System.out.println(textEnBits);
 		
 		/*
 		 *Agrandi la String de text maintenant en bit pour quelle
@@ -155,25 +156,9 @@ public class ArbreBinaire {
 		for(int i = 0;i < (8 - bitRestant);i++){
 			textEnBits += "0";
 		}
-		//System.out.println(textEnBits);
-		display48(textEnBits);
-		
-		/*
-		 * Divise la String de text maintenant en bits par échantillon de 8 bits(1octet)
-		 * puis match-up l'octet avec la table binaire et ajoute le résultat
-		 * dans l'arrayList de byte
-		 */
-		for(int j = 0;j < textEnBits.length();j += 8){
-			//prend les 8 premiers caractère de la string
-			String tempString  = textEnBits.substring(j,j+8);
-			//cherche dans la table binaire
-			byte bitsSample = this.tableBinaire.get(tempString);
-			  
-			compressedData.add(bitsSample);
-		}		
-		
-		
-		return this.compressedData;
+	    System.out.println("--Encodedbits--------------------------------------------------------");
+	    display48(textEnBits);
+		return textEnBits;
 	}
 
 	/**
