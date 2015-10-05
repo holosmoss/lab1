@@ -45,11 +45,23 @@ public class ArbreBinaire {
 		//TODO relfect on this and its size and possible compression
 		//on doit avoir suffisament d<info pour recreer larbre
 		//char+freq de chq node
-		//comment on écrit ca ? encoder en bits puis hexa ?
-		
-		return header;
+		//_ comme borne du header
+		header+="_";
+		return binaryStringConverter(header);
 	}
-	
+	private String binaryStringConverter(String txt){
+		//http://stackoverflow.com/questions/917163/convert-a-string-like-testing123-to-binary-in-java
+		byte[] bytes = txt.getBytes();
+		StringBuilder binary = new StringBuilder();
+		for (byte b : bytes){
+			int val = b;
+			for (int i = 0; i < 8; i++){
+				binary.append((val & 128) == 0 ? 0 : 1);
+				val <<= 1;
+			}
+		}
+		return binary.toString();
+	}
 	public Node creerArbre(TreeSet<Node> nodeList2) {
 		
 		while(nodeList2.size() > 1){
@@ -150,26 +162,28 @@ public byte[] doCompress(String text){
 		
 		String textEnBits = charToBit(this.root, text);
 		
-		
+		//ajouter le header en bits au textEnbits
+		//add length of orginal text in binary
+		String fullOutput = printHeader()+binaryStringConverter(textEnBits.length()+"")+textEnBits;
 		/*
 		 *Agrandi la String de text maintenant en bit pour quelle
 		 *soit de longueur multiple de 8
 		 */
-		int bitRestant = textEnBits.length()%8;
+		int bitRestant = fullOutput.length()%8;
 		for(int i = 0;i < (8 - bitRestant);i++){
-			textEnBits += "0";
+			fullOutput += "0";
 		}
 		
-		display48(textEnBits);
+		display48(fullOutput);
 		
 		/*
 		 * Divise la String de text maintenant en bits par échantillon de 8 bits(1octet)
 		 * puis match-up l'octet avec la table binaire et ajoute le résultat
 		 * dans l'arrayList de byte
 		 */
-		for(int j = 0;j < textEnBits.length();j += 8){
+		for(int j = 0;j < fullOutput.length();j += 8){
 			//prend les 8 premiers caractère de la string
-			String tempString  = textEnBits.substring(j,j+8);
+			String tempString  = fullOutput.substring(j,j+8);
 			//cherche dans la table binaire
 			byte bitsSample = this.tableBinaire.get(tempString);			  
 			compressedData.add(bitsSample);			
