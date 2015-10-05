@@ -2,6 +2,7 @@ package lab1;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 
@@ -17,9 +18,11 @@ public class ArbreBinaire {
 	private String bitText;
 	private String decodedText;
 	private String header = "";
-	private Hashtable <Character,String> binaryValues = new Hashtable<Character,String>();
+	public Hashtable <Character,String> binaryValues = new Hashtable<Character,String>();
 	private Hashtable<String,Character> decodingTable = new Hashtable<String,Character>();
-	
+	private Hashtable <Byte,String>decodingBitMap = new Hashtable<Byte,String>();
+	private int outputLength;
+	private Integer decodedRealLength;
 	/**
 	 * Constructeur qui créer l'abre binaire pour l'encodage
 	 * 
@@ -34,19 +37,42 @@ public class ArbreBinaire {
 		for(char b : freqSortedList){
 			Node n = new Node(b,frequence.get(b));
 			nodeList.add(n);	
-			header += b+"-"+frequence.get(b)+".";
 		}
 		
 		root = creerArbre(nodeList);
 		binaryNames(root);
 	}
+	public ArbreBinaire(String decodingHeader) {
+		
+		nodeList = new TreeSet<Node>();
+
+		String[] nodeStrings = decodingHeader.split(",");
+		for (String n : nodeStrings){
+			String[] nodeValues = n.split("-");
+			//System.out.println("char : "+nodeValues[0]+" bits: "+nodeValues[1]);
+			binaryValues.put(nodeValues[0].charAt(0), nodeValues[1]);
+			
+		}
+		//root = creerArbre(nodeList);
+		//binaryNames(root);
+//		//créer les noeuds de chaque caractère(byte) avec leur fréquence
+//		for(char b : freqSortedList){
+//			Node n = new Node(b,frequence.get(b));
+//			nodeList.add(n);	
+//			header += b+"-"+frequence.get(b)+".";
+//		}
+		
+//		root = creerArbre(nodeList);
+		//binaryNames(root);
+	}
 
 	public String printHeader(){
-		//TODO relfect on this and its size and possible compression
 		//on doit avoir suffisament d<info pour recreer larbre
 		//char+freq de chq node
 		//_ comme borne du header
-		header+="_";
+		header+=":"+outputLength+"_";
+		//return header;
+		System.out.println("--->"+header);
 		return binaryStringConverter(header);
 	}
 	private String binaryStringConverter(String txt){
@@ -118,6 +144,7 @@ public class ArbreBinaire {
 				
 				if(kidDroit.isLeaf){
 					binaryValues.put(kidDroit.getLettre(),kidDroit.binaryValue);
+					header += kidDroit.getLettre()+"-"+kidDroit.binaryValue+",";
 				}else{
 					binaryNames(kidDroit);
 				}
@@ -126,6 +153,7 @@ public class ArbreBinaire {
 				kidGauche.binaryValue = parentBVal+"0";
 				if(kidGauche.isLeaf){
 					binaryValues.put(kidGauche.getLettre(),kidGauche.binaryValue);
+					header += kidGauche.getLettre()+"-"+kidGauche.binaryValue+",";
 				}else{
 					binaryNames(kidGauche);
 				}
@@ -161,10 +189,16 @@ public class ArbreBinaire {
 public byte[] doCompress(String text){
 		
 		String textEnBits = charToBit(this.root, text);
+		System.out.println("--------textEnBits--------------------------------------------------");
+		display48(textEnBits);
 		
 		//ajouter le header en bits au textEnbits
 		//add length of orginal text in binary
-		String fullOutput = printHeader()+binaryStringConverter(textEnBits.length()+"")+textEnBits;
+		//TODO use the header to recreate the tree
+		this.outputLength = textEnBits.length();
+		String fullOutput = printHeader()+textEnBits;
+		//String fullOutput = textEnBits;
+		
 		/*
 		 *Agrandi la String de text maintenant en bit pour quelle
 		 *soit de longueur multiple de 8
@@ -173,7 +207,7 @@ public byte[] doCompress(String text){
 		for(int i = 0;i < (8 - bitRestant);i++){
 			fullOutput += "0";
 		}
-		
+		System.out.println("--------FullOutput--------------------------------------------------");
 		display48(fullOutput);
 		
 		/*
@@ -318,22 +352,27 @@ public byte[] doCompress(String text){
 	 * @param tailleFichierText - int - la longueur du texte original
 	 * @return une chaine de caractère contenant le text décompressé
 	 */
-	public String decompress(ArrayList <Byte>compressedData,
-            	  			 Hashtable <Character,String>encodingTable,
-            	  			 int tailleFichierText){
+	public String decompress(byte[] compressedData){
 		
 		//garde en mémoire les valeurs reçu en paramètre
 		//ça évite de les passer en paramètre par la suite
-		this.compressedData = compressedData;
-		this.encodingTable = encodingTable;
-			
-		
+//		this.compressedData = compressedData;
+//		this.encodingTable = encodingTable;
+		//TODO avoir un class decompressor qui va creer un nouvel arbre
+
 		//créer une table des possiblités binaire d'un octet pour le décodage
-		tableBinaire();
+		buildDecodingBitMap();
+		
+		
 		
 		//décode l'array de Byte en une chaine de bit (bitText)
-		decodeByteToStringBit();
+		decodeByteToStringBit(compressedData);
+		//TODO prendre le début du bitString pour connaitre le header
+			//longueur du header en bit ?
+			//le premier 11
 		
+		
+		//TODO a remplir avec ce que le header vas nous donner
 		//créer la table de décodage (decodingTable)
 		DecodingTable();
 		
@@ -343,7 +382,8 @@ public byte[] doCompress(String text){
 		
 		//retourne le text décompressé et décodé, et supprime les 0 ajoutés
 		//lors de l'encodage
-		return this.decodedText.substring(0,tailleFichierText);
+		return decodedText;
+		//return this.decodedText.substring(0,tailleFichierText);
 	}
 	
 	/**
@@ -354,21 +394,42 @@ public byte[] doCompress(String text){
 	 * http://www.developer.com/java/other/article.php/3603066/
 	 * Understanding-the-Huffman-Data-Compression-Algorithm-in-Java.htm
 	 */
-	public void decodeByteToStringBit(){
+	public void decodeByteToStringBit(byte[] compressedBytes){
 		StringBuffer strBuffer = new StringBuffer();
 
 		//fait correspondre chaque byte du arrayList à la table binaire
 		//pour faire un match-up
-		for(Byte b : this.compressedData){
+		for(Byte b : compressedBytes){
 			byte byteTmp = b;
-			strBuffer.append(this.tableBinaire.get(byteTmp));
+			strBuffer.append(this.decodingBitMap.get(byteTmp));
 		}
-		
+		//on est encore en binaire
 		this.bitText = strBuffer.toString();
 		
-		System.out.println("nString Decoded Data");
-		display48(bitText);
+		//TODO here we split the header at first instance of 01011111 
+//		
+//		//la limite interne du header est  :
+		int headerBorne1 = bitText.indexOf("00111010");
+		//la limite finale du header  est  _
+		int headerBorne2 = bitText.indexOf("01011111")+8;
+		String headerBits = bitText.substring(0, headerBorne1);
+		String header="";
+		for(int i=0;i<headerBits.length();i+=8 ){
+			//cration du string decoder du header
+			int charCode = Integer.parseInt(headerBits.substring(i, i+8), 2);
+			header += new Character((char)charCode).toString();
+		}
 
+//		int headerBorne2 =  tempUTFString.indexOf("_", headerBorne+1);
+//		String lengthStr = bitText.substring(headerBorne1, headerBorne2);
+//		this.decodedRealLength = Integer.valueOf(lengthStr);
+		bitText = bitText.substring(headerBorne2);
+//		System.out.println(headerBorne2);
+//		
+//		
+		System.out.println("===================");
+		System.out.println(bitText);
+		System.out.println("===================");
 	}
 	
 	/**
@@ -384,15 +445,39 @@ public byte[] doCompress(String text){
 	 * Understanding-the-Huffman-Data-Compression-Algorithm-in-Java.htm
 	 */
 	public void DecodingTable(){
-		
-		Enumeration<Character> enumerator = this.encodingTable.keys();
-		
+		//TODO  cette fonction inverse notre map pour associer char a bits
+		Enumeration<Character> enumerator = binaryValues.keys();
+		//TODO this has to be built from the new tree made of the header
 		while(enumerator.hasMoreElements() ){
 			Character nextKey = enumerator.nextElement();
-			String nextString = this.encodingTable.get(nextKey);
+			String nextString = binaryValues.get(nextKey);
 			decodingTable.put(nextString,nextKey);
 		}
 	}
+	
+	private void buildDecodingBitMap(){
+	    for(int cnt = 0; cnt <= 255;cnt++){
+	      StringBuffer workingBuf = new StringBuffer();
+	      if((cnt & 128) > 0){workingBuf.append("1");
+	        }else {workingBuf.append("0");};
+	      if((cnt & 64) > 0){workingBuf.append("1");
+	        }else {workingBuf.append("0");};
+	      if((cnt & 32) > 0){workingBuf.append("1");
+	        }else {workingBuf.append("0");};
+	      if((cnt & 16) > 0){workingBuf.append("1");
+	        }else {workingBuf.append("0");};
+	      if((cnt & 8) > 0){workingBuf.append("1");
+	        }else {workingBuf.append("0");};
+	      if((cnt & 4) > 0){workingBuf.append("1");
+	        }else {workingBuf.append("0");};
+	      if((cnt & 2) > 0){workingBuf.append("1");
+	        }else {workingBuf.append("0");};
+	      if((cnt & 1) > 0){workingBuf.append("1");
+	        }else {workingBuf.append("0");};
+	      decodingBitMap.put((byte)(cnt),workingBuf.
+	                                               toString());
+	    }//end for loop
+	  }//end buildDecodingBitMap()
 	
 	/**
 	 * On utilise deux buffer de string, un pour construire l'output 

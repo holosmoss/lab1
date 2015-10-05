@@ -12,6 +12,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,46 +27,58 @@ public class main {
 		  BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		  //System.out.print("Enter String : ");
 	      //ouvrir le fichier positioner dans le dossier du projet avec le nom indiquer dans la console
-	      //String s = br.readLine();
-	      File file = new File("test.txt");
-	      Path path = file.toPath();
-	      byte [] b = Files.readAllBytes(path);
-	      String wholeString = new String(b, StandardCharsets.UTF_8 );
-	      //VIEWING
-	      display48(wholeString);
-	      System.out.println("--displayRawDataAsBits--------------------------------------------------------");
-	      displayRawDataAsBits(wholeString);
-
-	      //hashmap des frequences
-	      Map <Character,Integer> frequence = new HashMap <Character,Integer>();
-	      for(int i = 0;i < wholeString.length();i++){
-	    	  char c = wholeString.charAt(i);
-	    	  if (frequence.containsKey(c)) {
-	    		    Integer prev = frequence.get(c);
-	    		    frequence.put(c, prev+1);
-	    		}  else {
-	    			frequence.put(c, 1);
-	    		}
+	      String s = br.readLine();
+	      if(s.equals("1")){
+		      File file = new File("file.txt");
+		      Path path = file.toPath();
+		      byte [] b = Files.readAllBytes(path);
+		      String wholeString = new String(b, StandardCharsets.UTF_8 );
+		      //VIEWING
+		     // display48(wholeString);
+		      //System.out.println("--displayRawDataAsBits--------------------------------------------------------");
+		      //displayRawDataAsBits(wholeString);
+	
+		      //hashmap des frequences
+		      Map <Character,Integer> frequence = new HashMap <Character,Integer>();
+		      for(int i = 0;i < wholeString.length();i++){
+		    	  char c = wholeString.charAt(i);
+		    	  if (frequence.containsKey(c)) {
+		    		    Integer prev = frequence.get(c);
+		    		    frequence.put(c, prev+1);
+		    		}  else {
+		    			frequence.put(c, 1);
+		    		}
+		      }
+	//	      
+		      //List de lordre des cle de la hashmap
+		      List<Character> freqSortedList = getWordInDescendingFreqOrder(frequence);
+	//	      
+		      
+		      //construit l'arbre binaire
+		      ArbreBinaire arbreBin = new ArbreBinaire(frequence, freqSortedList);
+		      arbreBin.tableBinaire();
+		      
+		      
+		      //compressSuperTigh représente nos byte compressé
+		      byte[] compressSuperTight = arbreBin.doCompress(wholeString);	
+		      File compressedFile = new File("compressed.txt");
+		     // java.nio.file.Files.write(compressedFile.toPath(), arbreBin.printHeader().getBytes());
+		      //, StandardOpenOption.APPEND
+		      java.nio.file.Files.write(compressedFile.toPath(), compressSuperTight);
+	      }else if(s.equals("2")){
+	    	 System.out.println("---Decompress---------------------------------------------------------");
+		     File decompressibleFile = new File("compressed.txt");
+		     byte [] compressedBytes = Files.readAllBytes(decompressibleFile.toPath());
+		      //décompression
+		     Decompressor decompressor = new Decompressor(compressedBytes);
+		     System.out.println("final : "+decompressor.decodedText);
+		     File decompressedFile = new File("expanded.txt");
+		     java.nio.file.Files.write(decompressedFile.toPath(), decompressor.decodedText.getBytes());
 	      }
-//	      
-	      //List de lordre des cle de la hashmap
-	      List<Character> freqSortedList = getWordInDescendingFreqOrder(frequence);
-//	      
+		  
 	      
-	      //construit l'arbre binaire
-	      ArbreBinaire arbreBin = new ArbreBinaire(frequence, freqSortedList);
-	      arbreBin.tableBinaire();
-	      
-	      
-	      //compressSuperTigh représente nos byte compressé
-	      byte[] compressSuperTight = arbreBin.doCompress(wholeString);	      
-	      java.nio.file.Files.write(new File("file.txt").toPath(), compressSuperTight);
-	      
-	      
-	      
-	      //décompression
-	     // arbreBin.decompress(compressSuperTight, encodingTable, wholeString.length() );
-	      
+
+	     
 	}
 
 	
