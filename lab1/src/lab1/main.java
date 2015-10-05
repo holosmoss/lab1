@@ -26,18 +26,14 @@ public class main {
 		
 		  BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		  //System.out.print("Enter String : ");
-	      //ouvrir le fichier positioner dans le dossier du projet avec le nom indiquer dans la console
 	      String s = br.readLine();
 	      if(s.equals("1")){
+	    	  //1 est la commande pour compresser le document
+		      System.out.println("---Compress---------------------------------------------------------");
 		      File file = new File("file.txt");
 		      Path path = file.toPath();
 		      byte [] b = Files.readAllBytes(path);
 		      String wholeString = new String(b, StandardCharsets.UTF_8 );
-		      //VIEWING
-		     // display48(wholeString);
-		      //System.out.println("--displayRawDataAsBits--------------------------------------------------------");
-		      //displayRawDataAsBits(wholeString);
-	
 		      //hashmap des frequences
 		      Map <Character,Integer> frequence = new HashMap <Character,Integer>();
 		      for(int i = 0;i < wholeString.length();i++){
@@ -49,56 +45,32 @@ public class main {
 		    			frequence.put(c, 1);
 		    		}
 		      }
-	//	      
-		      //List de lordre des cle de la hashmap
+		      //List de lordre descandant des cle de la hashmap
 		      List<Character> freqSortedList = getWordInDescendingFreqOrder(frequence);
-	//	      
 		      
 		      //construit l'arbre binaire
 		      ArbreBinaire arbreBin = new ArbreBinaire(frequence, freqSortedList);
 		      arbreBin.tableBinaire();
 		      
-		      
-		      //compressSuperTigh représente nos byte compressé
+		      //compressSuperTigh représente nos byte compressé qu<ont met dans le document
 		      byte[] compressSuperTight = arbreBin.doCompress(wholeString);	
 		      File compressedFile = new File("compressed.txt");
-		     // java.nio.file.Files.write(compressedFile.toPath(), arbreBin.printHeader().getBytes());
-		      //, StandardOpenOption.APPEND
 		      java.nio.file.Files.write(compressedFile.toPath(), compressSuperTight);
+		      
 	      }else if(s.equals("2")){
 	    	 System.out.println("---Decompress---------------------------------------------------------");
 		     File decompressibleFile = new File("compressed.txt");
 		     byte [] compressedBytes = Files.readAllBytes(decompressibleFile.toPath());
-		      //décompression
+		     //Creation de lobj decompressor qui transforme le stringCompressed en la version originale
 		     Decompressor decompressor = new Decompressor(compressedBytes);
-		     System.out.println("final : "+decompressor.decodedText);
 		     File decompressedFile = new File("expanded.txt");
+		     System.out.println(decompressor.decodedText);
 		     java.nio.file.Files.write(decompressedFile.toPath(), decompressor.decodedText.getBytes());
 	      }
-		  
-	      
 
 	     
 	}
 
-	
-	/**
-	 * Petit fonction pour afficher de très grande string sur plusieurs ligne
-	 * référence : 
-	 * http://www.developer.com/java/other/article.php/3603066/
-	 * Understanding-the-Huffman-Data-Compression-Algorithm-in-Java.htm
-	 */
-	public static void display48(String data){
-		 for(int cnt = 0;cnt < data.length();cnt += 48){
-		   if((cnt + 48) < data.length()){
-		     //Display 48 characters.
-		     System.out.println(data.substring(cnt,cnt+48));
-		   }else{
-		     //Display the final line, which may be short.
-		     System.out.println(data.substring(cnt));
-		   }//end else
-		 }//end for loop
-		}
 	
 	/**
 	 * 
@@ -128,36 +100,7 @@ public class main {
 	        result.add(entry.getKey());   	
 	    	
 	    }
-	    	    
 	    return result;
-	    
 	}
-	
-
-	 //-----------------------------------------------------//
-	  
-	  //This method displays a message string as a series of
-	  // characters each having a value of 1 or 0.
-	 private static void displayRawDataAsBits(String rawData){
-	    for(int cnt = 0,charCnt = 0;cnt < rawData.length();
-	                                          cnt++,charCnt++){
-	      char theCharacter = rawData.charAt(cnt);
-	      String binaryString = Integer.toBinaryString(
-	                                             theCharacter);
-	      //Append leading zeros as necessary to show eight
-	      // bits per character.
-	      while(binaryString.length() < 8){
-	        binaryString = "0" + binaryString;
-	      }//end while loop
-	      if(charCnt%6 == 0){
-	        //Display 48 bits per line.
-	        charCnt = 0;
-	        System.out.println();//new line
-	      }//end if
-	      System.out.print(binaryString);
-	    }//end for loop
-	    System.out.println();
-	  }//end displayRawDataAsBits
-	  //-----------------------------------------------------//
 	
 }

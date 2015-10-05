@@ -9,43 +9,51 @@ public class Decompressor {
 	private Hashtable <Byte,String>decodingBitMap = new Hashtable<Byte,String>();
 	private String bitText;
 	private String header="";
-	private ArbreBinaire decodeTree;
 	private Hashtable<String,Character> decodingTable = new Hashtable<String,Character>();
 	private String lengthStr = "";
 	private Integer decodedRealLength;
+	private Hashtable <Character,String> binaryValues = new Hashtable<Character,String>();
 
 		
 		public Decompressor(byte[] compressedData) {
-			
-			//garde en mémoire les valeurs reçu en paramètre
-			//ça évite de les passer en paramètre par la suite
-//			this.compressedData = compressedData;
-//			this.encodingTable = encodingTable;
-			//TODO avoir un class decompressor qui va creer un nouvel arbre
 
 			//créer une table des possiblités binaire d'un octet pour le décodage
 			buildDecodingBitMap();
 			
-			
-			
 			//décode l'array de Byte en une chaine de bit (bitText)
 			decodeByteToStringBit(compressedData);
-
-			this.decodeTree = new ArbreBinaire(header);
 			
-			//TODO a remplir avec ce que le header vas nous donner
-			//créer la table de décodage (decodingTable)
+			//cration de la map de binaryValues par char selon le header
+			String[] nodeStrings = header.split(",!");
+			for (String n : nodeStrings){
+				String[] nodeValues = n.split("-!");
+				//System.out.println("char : "+nodeValues[0]+" bits: "+nodeValues[1]);
+				this.binaryValues.put(nodeValues[0].charAt(0), nodeValues[1]);
+				
+			}
+//			
+//			//créer la table de décodage (decodingTable)
 			DecodingTable();
-			
-			
-			//décode la chaine de bit (decodedText)
+//			
+//			
+//			//décode la chaine de bit (decodedText)
 			BitToChar();
 			
 			//retourne le text décompressé et décodé, et supprime les 0 ajoutés
 			//lors de l'encodage
 		}
 
-		
+		public static void display48(String data){
+			 for(int cnt = 0;cnt < data.length();cnt += 48){
+			   if((cnt + 48) < data.length()){
+			     //Display 48 characters.
+			     System.out.println(data.substring(cnt,cnt+48));
+			   }else{
+			     //Display the final line, which may be short.
+			     System.out.println(data.substring(cnt));
+			   }//end else
+			 }//end for loop
+			}
 	
 		/**
 		 * Fonction qui décode chaque byte du arrayList<Byte> 
@@ -67,39 +75,39 @@ public class Decompressor {
 			//on est encore en binaire
 			this.bitText = strBuffer.toString();
 			
-//			
-//			//la limite interne du header est  :
-			int headerBorne1 = bitText.indexOf("00111010");
-			//la limite finale du header  est  _
-			int headerBorne2 = bitText.indexOf("01011111")+8;
+//			//la limite interne du header est  ::
+			int headerBorne1 = bitText.indexOf("0011101000111010");
+			//la limite finale du header  est  __
+			int headerBorne2 = bitText.indexOf("0101111101011111")+16;
 			String headerBits = bitText.substring(0, headerBorne1);
-			
 			
 			for(int i=0;i<headerBits.length();i+=8 ){
 				//cration du string decoder du header
 				int charCode = Integer.parseInt(headerBits.substring(i, i+8), 2);
 				this.header += new Character((char)charCode).toString();
 			}
+			System.out.println(header);
 			
-			String lenghtBits = bitText.substring(headerBorne1+8, headerBorne2-8);
-			
+			String lenghtBits = bitText.substring(headerBorne1+16, headerBorne2-16);
+
 			for(int i=0;i<lenghtBits.length();i+=8 ){
 				//cration du string decoder du header
-				int charCode = Integer.parseInt(lenghtBits.substring(i, i+8), 2);
+				 int charCode = Integer.parseInt(lenghtBits.substring(i, i+8), 2);
 				this.lengthStr += new Character((char)charCode).toString();
 			}
-
-//			int headerBorne2 =  tempUTFString.indexOf("_", headerBorne+1);
-//			String lengthStr = bitText.substring(headerBorne1, headerBorne2);
+			System.out.println(lengthStr);
+//
+////			int headerBorne2 =  tempUTFString.indexOf("_", headerBorne+1);
+////			String lengthStr = bitText.substring(headerBorne1, headerBorne2);
 			this.decodedRealLength = Integer.valueOf(lengthStr);
 			bitText = bitText.substring(headerBorne2);
-			bitText = bitText.substring(0,decodedRealLength );
-//			System.out.println(headerBorne2);
-//			
-//			
-			System.out.println("++++++++");
-			System.out.println(decodedRealLength);
-			System.out.println("++++++++");
+			bitText = bitText.substring(0,decodedRealLength);
+////			System.out.println(headerBorne2);
+////			
+////			
+//			System.out.println("++++++++");
+//			System.out.println(decodedRealLength);
+//			System.out.println("++++++++");
 
 		}
 		
@@ -117,11 +125,11 @@ public class Decompressor {
 		 */
 		public void DecodingTable(){
 			//TODO  cette fonction inverse notre map pour associer char a bits
-			Enumeration<Character> enumerator = decodeTree.binaryValues.keys();
+			Enumeration<Character> enumerator = binaryValues.keys();
 			//TODO this has to be built from the new tree made of the header
 			while(enumerator.hasMoreElements() ){
 				Character nextKey = enumerator.nextElement();
-				String nextString = decodeTree.binaryValues.get(nextKey);
+				String nextString = binaryValues.get(nextKey);
 				decodingTable.put(nextString,nextKey);
 			}
 		}

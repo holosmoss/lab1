@@ -1,8 +1,5 @@
 package lab1;
 
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 
@@ -13,8 +10,6 @@ public class ArbreBinaire {
 	private Node root;
 	private Hashtable<String,Byte> tableBinaire = new Hashtable<String,Byte>();
 	private ArrayList<Byte> compressedData = new ArrayList<Byte>();
-	private Hashtable<Character,String> encodingTable;
-	private int tailleFichierText;
 	private String bitText;
 	private String decodedText;
 	private String header = "";
@@ -22,7 +17,6 @@ public class ArbreBinaire {
 	private Hashtable<String,Character> decodingTable = new Hashtable<String,Character>();
 	private Hashtable <Byte,String>decodingBitMap = new Hashtable<Byte,String>();
 	private int outputLength;
-	private Integer decodedRealLength;
 	/**
 	 * Constructeur qui créer l'abre binaire pour l'encodage
 	 * 
@@ -42,35 +36,13 @@ public class ArbreBinaire {
 		root = creerArbre(nodeList);
 		binaryNames(root);
 	}
-	public ArbreBinaire(String decodingHeader) {
-		
-		nodeList = new TreeSet<Node>();
 
-		String[] nodeStrings = decodingHeader.split(",");
-		for (String n : nodeStrings){
-			String[] nodeValues = n.split("-");
-			//System.out.println("char : "+nodeValues[0]+" bits: "+nodeValues[1]);
-			binaryValues.put(nodeValues[0].charAt(0), nodeValues[1]);
-			
-		}
-		//root = creerArbre(nodeList);
-		//binaryNames(root);
-//		//créer les noeuds de chaque caractère(byte) avec leur fréquence
-//		for(char b : freqSortedList){
-//			Node n = new Node(b,frequence.get(b));
-//			nodeList.add(n);	
-//			header += b+"-"+frequence.get(b)+".";
-//		}
-		
-//		root = creerArbre(nodeList);
-		//binaryNames(root);
-	}
 
 	public String printHeader(){
 		//on doit avoir suffisament d<info pour recreer larbre
 		//char+freq de chq node
 		//_ comme borne du header
-		header+=":"+outputLength+"_";
+		header+="::"+outputLength+"__";
 		//return header;
 		System.out.println("--->"+header);
 		return binaryStringConverter(header);
@@ -144,7 +116,7 @@ public class ArbreBinaire {
 				
 				if(kidDroit.isLeaf){
 					binaryValues.put(kidDroit.getLettre(),kidDroit.binaryValue);
-					header += kidDroit.getLettre()+"-"+kidDroit.binaryValue+",";
+					header += kidDroit.getLettre()+"-!"+kidDroit.binaryValue+",!";
 				}else{
 					binaryNames(kidDroit);
 				}
@@ -153,7 +125,7 @@ public class ArbreBinaire {
 				kidGauche.binaryValue = parentBVal+"0";
 				if(kidGauche.isLeaf){
 					binaryValues.put(kidGauche.getLettre(),kidGauche.binaryValue);
-					header += kidGauche.getLettre()+"-"+kidGauche.binaryValue+",";
+					header += kidGauche.getLettre()+"-!"+kidGauche.binaryValue+",!";
 				}else{
 					binaryNames(kidGauche);
 				}
