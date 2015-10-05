@@ -21,13 +21,15 @@ public class Decompressor {
 			buildDecodingBitMap();
 			
 			//décode l'array de Byte en une chaine de bit (bitText)
+			//soccupe aussi du header pour la suite
 			decodeByteToStringBit(compressedData);
 			
-			//cration de la map de binaryValues par char selon le header
+			//creation de la map de binaryValues par char selon le header
+			//separation de la chaine de char du header en symbole de valeur allant dans notre Hashmap : binaryValues 
 			String[] nodeStrings = header.split(",!");
 			for (String n : nodeStrings){
+				//nodeValues[0].charAt(0) est la valeur du char  et [1] le bit string qui la remplace
 				String[] nodeValues = n.split("-!");
-				//System.out.println("char : "+nodeValues[0]+" bits: "+nodeValues[1]);
 				this.binaryValues.put(nodeValues[0].charAt(0), nodeValues[1]);
 				
 			}
@@ -38,22 +40,7 @@ public class Decompressor {
 //			
 //			//décode la chaine de bit (decodedText)
 			BitToChar();
-			
-			//retourne le text décompressé et décodé, et supprime les 0 ajoutés
-			//lors de l'encodage
 		}
-
-		public static void display48(String data){
-			 for(int cnt = 0;cnt < data.length();cnt += 48){
-			   if((cnt + 48) < data.length()){
-			     //Display 48 characters.
-			     System.out.println(data.substring(cnt,cnt+48));
-			   }else{
-			     //Display the final line, which may be short.
-			     System.out.println(data.substring(cnt));
-			   }//end else
-			 }//end for loop
-			}
 	
 		/**
 		 * Fonction qui décode chaque byte du arrayList<Byte> 
@@ -75,7 +62,8 @@ public class Decompressor {
 			//on est encore en binaire
 			this.bitText = strBuffer.toString();
 			
-//			//la limite interne du header est  ::
+			//On cherche les borne du header pour le separer du text
+			//la limite interne du header est  ::
 			int headerBorne1 = bitText.indexOf("0011101000111010");
 			//la limite finale du header  est  __
 			int headerBorne2 = bitText.indexOf("0101111101011111")+16;
@@ -86,8 +74,8 @@ public class Decompressor {
 				int charCode = Integer.parseInt(headerBits.substring(i, i+8), 2);
 				this.header += new Character((char)charCode).toString();
 			}
-			System.out.println(header);
 			
+			//separation pour la longueur du text original
 			String lenghtBits = bitText.substring(headerBorne1+16, headerBorne2-16);
 
 			for(int i=0;i<lenghtBits.length();i+=8 ){
@@ -95,19 +83,11 @@ public class Decompressor {
 				 int charCode = Integer.parseInt(lenghtBits.substring(i, i+8), 2);
 				this.lengthStr += new Character((char)charCode).toString();
 			}
-			System.out.println(lengthStr);
-//
-////			int headerBorne2 =  tempUTFString.indexOf("_", headerBorne+1);
-////			String lengthStr = bitText.substring(headerBorne1, headerBorne2);
+			
 			this.decodedRealLength = Integer.valueOf(lengthStr);
+			//decoupage du text de bit pour garder que le message
 			bitText = bitText.substring(headerBorne2);
 			bitText = bitText.substring(0,decodedRealLength);
-////			System.out.println(headerBorne2);
-////			
-////			
-//			System.out.println("++++++++");
-//			System.out.println(decodedRealLength);
-//			System.out.println("++++++++");
 
 		}
 		
@@ -119,14 +99,12 @@ public class Decompressor {
 		 *  ça sera utile pour le décodage du string ex: 0101010100101010101000111010111
 		 *  en caractère AABBCCDDEE
 		 *  
-		 *  référence : 
+		 *  référence (copy pasted): 
 		 * http://www.developer.com/java/other/article.php/3603066/
 		 * Understanding-the-Huffman-Data-Compression-Algorithm-in-Java.htm
 		 */
 		public void DecodingTable(){
-			//TODO  cette fonction inverse notre map pour associer char a bits
 			Enumeration<Character> enumerator = binaryValues.keys();
-			//TODO this has to be built from the new tree made of the header
 			while(enumerator.hasMoreElements() ){
 				Character nextKey = enumerator.nextElement();
 				String nextString = binaryValues.get(nextKey);
@@ -163,6 +141,16 @@ public class Decompressor {
 			 
 			this.decodedText = output.toString();
 		}
+		/**
+		 * Fonction qui créer une table binaire de tous les possibilités
+		 * binaire qu'un octet peux prendre. On s'en servira pour faire un match-up
+		 * lors de la decompression. 
+		 * 
+		 * 
+		 * référence (copy pasted): 
+		 * http://www.developer.com/java/other/article.php/3603066/
+		 * Understanding-the-Huffman-Data-Compression-Algorithm-in-Java.htm
+		 */
 		private void buildDecodingBitMap(){
 		    for(int cnt = 0; cnt <= 255;cnt++){
 		      StringBuffer workingBuf = new StringBuffer();
@@ -184,6 +172,6 @@ public class Decompressor {
 		        }else {workingBuf.append("0");};
 		      decodingBitMap.put((byte)(cnt),workingBuf.
 		                                               toString());
-		    }//end for loop
-		  }//end buildDecodingBitMap()
+		    }
+		  }
 }

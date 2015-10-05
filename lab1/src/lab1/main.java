@@ -56,6 +56,8 @@ public class main {
 		      byte[] compressSuperTight = arbreBin.doCompress(wholeString);	
 		      File compressedFile = new File("compressed.txt");
 		      java.nio.file.Files.write(compressedFile.toPath(), compressSuperTight);
+		      System.out.println("complete");
+
 		      
 	      }else if(s.equals("2")){
 	    	 System.out.println("---Decompress---------------------------------------------------------");
@@ -64,8 +66,9 @@ public class main {
 		     //Creation de lobj decompressor qui transforme le stringCompressed en la version originale
 		     Decompressor decompressor = new Decompressor(compressedBytes);
 		     File decompressedFile = new File("expanded.txt");
-		     System.out.println(decompressor.decodedText);
+		     //sort le text decompresser pour le sauvegarder dans un nouveau .txt
 		     java.nio.file.Files.write(decompressedFile.toPath(), decompressor.decodedText.getBytes());
+		     System.out.println("complete");
 	      }
 
 	     
