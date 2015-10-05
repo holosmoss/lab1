@@ -24,13 +24,20 @@ public class main {
 	
 	public static void main(String[] args) throws IOException{
 		
+		  long startTime;
+		  long endTime;
+		  String time;
+		
 		  BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		  //System.out.print("Enter String : ");
+		  System.out.println("Entrer le nom du fichier avec son extension : ");
+		  String filename = br.readLine();
+		  System.out.println("tapez 1 pour compresser, 2 pour décompresser:  ");
 	      String s = br.readLine();
 	      if(s.equals("1")){
 	    	  //1 est la commande pour compresser le document
 		      System.out.println("---Compress---------------------------------------------------------");
-		      File file = new File("file.txt");
+		      startTime = System.currentTimeMillis();
+		      File file = new File(filename);
 		      Path path = file.toPath();
 		      byte [] b = Files.readAllBytes(path);
 		      String wholeString = new String(b, StandardCharsets.UTF_8 );
@@ -56,18 +63,26 @@ public class main {
 		      byte[] compressSuperTight = arbreBin.doCompress(wholeString);	
 		      File compressedFile = new File("compressed.txt");
 		      java.nio.file.Files.write(compressedFile.toPath(), compressSuperTight);
+		      endTime = System.currentTimeMillis();
+			  time = String.valueOf(endTime-startTime);			
+			  System.out.println("temps1= "+ time + "ms" );
 		      System.out.println("complete");
+		      
 
 		      
 	      }else if(s.equals("2")){
 	    	 System.out.println("---Decompress---------------------------------------------------------");
-		     File decompressibleFile = new File("compressed.txt");
+	    	 startTime = System.currentTimeMillis();
+	    	 File decompressibleFile = new File(filename);
 		     byte [] compressedBytes = Files.readAllBytes(decompressibleFile.toPath());
 		     //Creation de lobj decompressor qui transforme le stringCompressed en la version originale
 		     Decompressor decompressor = new Decompressor(compressedBytes);
 		     File decompressedFile = new File("expanded.txt");
 		     //sort le text decompresser pour le sauvegarder dans un nouveau .txt
 		     java.nio.file.Files.write(decompressedFile.toPath(), decompressor.decodedText.getBytes());
+		     endTime = System.currentTimeMillis();
+			 time = String.valueOf(endTime-startTime);			
+			 System.out.println("temps2= "+ time + "ms" );
 		     System.out.println("complete");
 	      }
 
