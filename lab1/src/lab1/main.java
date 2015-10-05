@@ -43,7 +43,8 @@ public class main {
 		      String wholeString = new String(b, StandardCharsets.UTF_8 );
 		      //hashmap des frequences
 		      Map <Character,Integer> frequence = new HashMap <Character,Integer>();
-		      for(int i = 0;i < wholeString.length();i++){
+		      for(int i = 1;i < wholeString.length();i++){
+		    	  //TODO le ficier encodé en utf-8 a un ? au debut so ont skip le premier char
 		    	  char c = wholeString.charAt(i);
 		    	  if (frequence.containsKey(c)) {
 		    		    Integer prev = frequence.get(c);
